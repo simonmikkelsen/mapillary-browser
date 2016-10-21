@@ -27,13 +27,21 @@ $('#showSequence').click(function (){
     $.getJSON( "https://a.mapillary.com/v2/s/"+seqId+"?client_id="+clientId, function( data ) {
       var items = [];
       $.each( data['keys'], function( key, val ) {
-        items.push( "<a href=\"https://www.mapillary.com/app/?pKey="+val+"&amp;focus=photo\"><img src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+val+"/thumb-"+imageSize+".jpg\" /></a>" );
+        // Image sizes are only given so the images are located where the probably will be.
+        // The unveil plugin can then wait to load images untill they are about to be shown.
+        items.push( "<a href=\"https://www.mapillary.com/app/?pKey="+val+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""+imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+val+"/thumb-"+imageSize+".jpg\" /></a>" );
       });
      
       $( "<div/>", {
         "class": "imageList",
         html: items.join("")
       }).appendTo("body");
+      
+        $(document).ready(function() {
+          $("img").unveil(500, function () {
+              // When an image is unveiled (loaded when almost visible) the approzimate size will be changed to auto again.
+              $(this).css({"width": "auto", "height": "auto"});
+          });
+        });
     });
-
 });
