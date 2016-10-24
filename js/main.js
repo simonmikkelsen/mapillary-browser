@@ -30,7 +30,7 @@ function showImagesByKeys(keys) {
       $( "<div/>", {
         "class": "imageList",
         html: items.join("")
-      }).appendTo("body");
+      }).appendTo("#imageContainer");
       
         $(document).ready(function() {
           $("img").unveil(500, function () {

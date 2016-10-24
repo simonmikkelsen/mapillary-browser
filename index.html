@@ -25,17 +25,20 @@
             <label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label>
         </div>
         <div id="sequenceSelector" class="container">
-            <h4>Select iamges by sequence ID</h4>
+            <h4>Select images by sequence ID</h4>
             Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
             <input type="button" value="Show sequence" id="showSequence" />
         </div>
         <div id="map" class="container">
             <h4>Select images by map</h4>
+            <p>Zoom and move the map to only show the area you want to get images from. Will be prettier in the future.</p>
             <div id="mapid"></div>
             <input type="button" value="Show images from map" id="showMapImages" />
         </div>
         
-        <p>Get the code on <a href="https://github.com/simonmikkelsen/mapillary-browser">GitHub</a> - <a href="LICENSE">MIT License</a>.</p>
+        <div id="imageContainer"></div>
+        
+        <p>Get the code on <a href="https://github.com/simonmikkelsen/mapillary-browser">GitHub</a> - <a href="LICENSE">MIT License</a> - Click on each image to see time and author.</p>
     
         <!-- script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
