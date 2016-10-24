@@ -1,0 +1,10 @@
+#mapid {
+    height: 300px;
+    width: 400px;
+}
+
+.container {
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+    border-bottom: solid thin silver;
+}
