@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="css/normalize.min.css">
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/mbrowser.css">
+        <link rel="stylesheet" href="css/leaflet-areaselect.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
@@ -31,18 +32,22 @@
         </div>
         <div id="map" class="container">
             <h4>Select images by map</h4>
-            <p>Zoom and move the map to only show the area you want to get images from. Will be prettier in the future.</p>
+            <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. Will be prettier and better in the future.</p>
             <div id="mapid"></div>
             <input type="button" value="Show images from map" id="showMapImages" />
         </div>
         
+        <div class="nextPrevBar"></div>
         <div id="imageContainer"></div>
+        <div class="nextPrevBar"></div>
         
         <p>Get the code on <a href="https://github.com/simonmikkelsen/mapillary-browser">GitHub</a> - <a href="LICENSE">MIT License</a> - Click on each image to see time and author.</p>
     
         <!-- script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
         <script src="js/vendor/jquery.unveil.js"></script>
+        <script src="js/vendor/leaflet-areaselect.js"></script>
+        <script src="js/keys.js"></script>
         <script src="js/main.js"></script>
         
     </body>

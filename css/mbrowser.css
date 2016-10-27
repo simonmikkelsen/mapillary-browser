@@ -8,3 +8,8 @@
     margin-bottom: 1em;
     border-bottom: solid thin silver;
 }
+
+.nextPrevBar {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
