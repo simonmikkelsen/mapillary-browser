@@ -3,13 +3,17 @@
     width: 400px;
 }
 
-.container {
-    padding-bottom: 1em;
-    margin-bottom: 1em;
-    border-bottom: solid thin silver;
-}
-
 .nextPrevBar {
     padding-top: 1em;
     padding-bottom: 1em;
+}
+
+#tabsSelectBy .nav-pills > li > a {
+  border-radius: 4px 4px 0 0 ;
+}
+
+#tabsSelectBy .tab-content {
+  color: black;
+  background-color: #DDEDFF;
+  padding: 5px 15px;
 }

@@ -1,14 +1,10 @@
-<!doctype html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Mapillary browser</title>
-        <meta name="description" content="">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Mapillary browser</title>
 
         <link rel="stylesheet" href="css/normalize.min.css">
         <link rel="stylesheet" href="css/main.css">
@@ -17,34 +13,52 @@
 
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
         <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     </head>
     <body>
-        <p><b>Mapillary browser</b> - still rough but will get prettier...</p>
-        <div id="options" class="container">
-            <h4>General options</h4>
-            Size: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select>
-            <label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label>
+         
+        <div class="container">
+            <div class="navbar-brand">Mapillary browser</div>
         </div>
-        <div id="sequenceSelector" class="container">
-            <h4>Select images by sequence ID</h4>
-            Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
-            <input type="button" value="Show sequence" id="showSequence" />
+    
+        <div id="tabsSelectBy" class="container">	
+            <ul  class="nav nav-pills">
+                <li class="active"><a href="#tabSelectBySeqId" data-toggle="tab">Select by sequence ID</a></li>
+                <li><a href="#tabSelectOnMap" data-toggle="tab">Select on map</a></li>
+                <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
+            </ul>
+
+			<div class="tab-content clearfix">
+			    <div class="tab-pane active" id="tabSelectBySeqId">
+                    <h4>Select images by sequence ID</h4>
+                    Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
+                    <input type="button" value="Show sequence" id="showSequence" />
+			    </div>
+                <div class="tab-pane" id="tabSelectOnMap">
+                    <h4>Select images by map</h4>
+                    <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. In the future it might be possible to select an area (pleae make a pull request).</p>
+                    <div id="mapid"></div>
+                    <input type="button" value="Show images from map" id="showMapImages" />
+                </div>
+                <div class="tab-pane" id="tabOptions">
+                    <div>Image width: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select></div>
+                    <div><label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label></div>
+                </div>
+			</div>
         </div>
-        <div id="map" class="container">
-            <h4>Select images by map</h4>
-            <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. Will be prettier and better in the future.</p>
-            <div id="mapid"></div>
-            <input type="button" value="Show images from map" id="showMapImages" />
-        </div>
+
         
         <div class="nextPrevBar"></div>
-        <div id="imageContainer"></div>
+        <div id="imageContainer" class="container-fluid"></div>
         <div class="nextPrevBar"></div>
         
-        <p>Get the code on <a href="https://github.com/simonmikkelsen/mapillary-browser">GitHub</a> - <a href="LICENSE">MIT License</a> - Click on each image to see time and author.</p>
+        <div class="container">Get the code on <a href="https://github.com/simonmikkelsen/mapillary-browser">GitHub</a> - <a href="LICENSE">MIT License</a> - Click on each image to see time and author.</p>
     
         <!-- script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="js/vendor/jquery.unveil.js"></script>
         <script src="js/keys.js"></script>
         <script src="js/main.js"></script>

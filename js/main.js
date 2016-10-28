@@ -23,6 +23,13 @@ $(document).ready(function() {
     $('#showMapImages').click(function() {
         seqViewer.updateSequenceForMap();
     });
+    
+    // Invalidate map so it will not be grey when switching to the tab.
+    $('#tabsSelectBy a').click(function() {
+        setTimeout(function() {
+            mymap.invalidateSize();
+        }, 0);
+    });
 });
 
 function SequenceViewer(map) {
