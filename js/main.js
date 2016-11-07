@@ -1,16 +1,5 @@
 "use strict";
 
-$('#fitImagesToWindow').click(function() {
-    var seqViewer = new SequenceViewer();
-    seqViewer.fitImagesToWindow();
-});
-
-$('#showSequence').click(function (){
-    var seqViewer = new SequenceViewer();
-    var seqId = $('#sequenceID').val();
-    seqViewer.showSequence(seqId);
-});
-
 $('#size').click(function () {
     var imageSize = $('#size').val();
     var state = new StateManager();
@@ -29,6 +18,15 @@ $(document).ready(function() {
     
     $('#showMapImages').click(function() {
         seqViewer.updateSequenceForMap();
+    });
+    
+    $('#fitImagesToWindow').click(function() {
+        seqViewer.fitImagesToWindow();
+    });
+
+    $('#showSequence').click(function (){
+        var seqId = $('#sequenceID').val();
+        seqViewer.showSequence(seqId);
     });
     
     // Invalidate map so it will not be grey when switching to the tab.

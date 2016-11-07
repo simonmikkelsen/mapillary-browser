@@ -22,33 +22,46 @@
         <div class="container">
             <div class="navbar-brand">Mapillary browser</div>
         </div>
+        <div class="container">
     
-        <div id="tabsSelectBy" class="container">	
-            <ul  class="nav nav-pills">
-                <li class="active"><a href="#tabSelectOnMap" data-toggle="tab">Select on map</a></li>
-                <li><a href="#tabSelectBySeqId" data-toggle="tab">Select by sequence ID</a></li>
-                <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
-            </ul>
+            <div class="row">
+                <div class="col-md-8">
+                
+                    <div id="tabsSelectBy">
+                        <ul  class="nav nav-pills">
+                            <li class="active"><a href="#tabSelectOnMap" data-toggle="tab">Select on map</a></li>
+                            <li><a href="#tabSelectBySeqId" data-toggle="tab">Select by sequence ID</a></li>
+                            <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
+                        </ul>
 
-			<div class="tab-content clearfix">
-			    <div class="tab-pane" id="tabSelectBySeqId">
-                    <h4>Select images by sequence ID</h4>
-                    Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
-                    <input type="button" value="Show sequence" id="showSequence" />
-			    </div>
-                <div class="tab-pane active" id="tabSelectOnMap">
-                    <h4>Select images by map</h4>
-                    <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. In the future it might be possible to select an area (pleae make a pull request).</p>
+                        <div class="tab-content clearfix">
+                            <div class="tab-pane" id="tabSelectBySeqId">
+                                <h4>Select images by sequence ID</h4>
+                                Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
+                                <input type="button" value="Show sequence" id="showSequence" />
+                            </div>
+                            <div class="tab-pane active" id="tabSelectOnMap">
+                                <h4>Select images by map</h4>
+                                <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. In the future it might be possible to select an area (pleae make a pull request).</p>
+                                <div id="xmapid"></div>
+                                <input type="button" value="Show images from map" id="showMapImages" />
+                            </div>
+                            <div class="tab-pane" id="tabOptions">
+                                <div>Image width: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select></div>
+                                <div><label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label></div>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+                <div class="col-md-4">
                     <div id="mapid"></div>
-                    <input type="button" value="Show images from map" id="showMapImages" />
                 </div>
-                <div class="tab-pane" id="tabOptions">
-                    <div>Image width: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select></div>
-                    <div><label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label></div>
-                </div>
-			</div>
-        </div>
 
+            </div>
+        
+        </div> <!-- container -->
+        
         
         <div class="nextPrevBar"></div>
         <div id="imageContainer" class="container-fluid"></div>
