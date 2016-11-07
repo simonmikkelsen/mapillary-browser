@@ -11,6 +11,12 @@ $('#showSequence').click(function (){
     seqViewer.showSequence(seqId);
 });
 
+$('#size').click(function () {
+    var imageSize = $('#size').val();
+    var state = new StateManager();
+    state.setValue('imageSize', imageSize);
+});
+
 $(document).ready(function() {
     var mymap = L.map('mapid').setView([51.505, -0.09], 3);
     
@@ -56,9 +62,21 @@ $(document).on('keydown', function (e) {
 });
 
 function StateManager() {
-    this.knownKeys = ['page', 'seqId', 'min_lat', 'max_lat', 'min_lon', 'max_lon'];
+    this.knownKeys = ['page', 'seqId', 'imageSize', 'min_lat', 'max_lat', 'min_lon', 'max_lon'];
     this.arguments = {};
     this.parseHash();
+}
+
+StateManager.prototype.clearNonSequenceState = function() {
+    delete this.arguments['min_lat'];
+    delete this.arguments['max_lat'];
+    delete this.arguments['min_lon'];
+    delete this.arguments['max_lon'];
+    delete this.arguments['page'];
+}
+
+StateManager.prototype.clearNonMapState = function() {
+    delete this.arguments['seqId'];
 }
 
 StateManager.prototype.isMapSelected = function() {
@@ -112,10 +130,14 @@ function SequenceViewer(map) {
     this.max_lat = -1;
     this.min_lon = -1;
     this.max_lon = -1;
+    this.state = new StateManager();
 }
 
 SequenceViewer.prototype.fitImagesToWindow = function() {
     var fit = $('#fitImagesToWindow').is(':checked');
+    
+    this.state.setValue('fitImages', (fit ? "true" : "false" ))
+    ;
     $(".imageList").each(function(){
         var $img = jQuery(this).find("img");
         if (fit) {
@@ -129,7 +151,7 @@ SequenceViewer.prototype.fitImagesToWindow = function() {
 SequenceViewer.prototype.showImagesByKeys = function(keys) {
     $('.imageList').remove();
     var imageSize = $('#size').val();
-    
+
     var items = [];
     $.each(keys , function(key, val) {
         // Image sizes are only given so the images are located where the probably will be.
@@ -159,8 +181,8 @@ SequenceViewer.prototype.showSequence = function(seqId) {
     $.getJSON( "https://a.mapillary.com/v2/s/"+seqId+"?client_id="+clientId, function(seq) {
         var key = seq['keys'];
         self.showImagesByKeys(key);
-        var state = new StateManager();
-        state.setValue('seqId', seqId);
+        self.state.clearNonSequenceState();
+        self.state.setValue('seqId', seqId);
     });
 }
 
@@ -177,17 +199,16 @@ SequenceViewer.prototype.updateSequenceForMap = function() {
 }
 
 SequenceViewer.prototype.updateFromMapState = function() {
-    var state = new StateManager();
-    var pageNoLocal = state.getValue('page');
+    var pageNoLocal = this.state.getValue('page');
     this.pageNo = 0;
     if (pageNoLocal !== undefined) {
         this.pageNo = pageNoLocal;
     }
     
-    var min_lat = state.getValue('min_lat');
-    var max_lat = state.getValue('max_lat');
-    var min_lon = state.getValue('min_lon');
-    var max_lon = state.getValue('max_lon');
+    var min_lat = this.state.getValue('min_lat');
+    var max_lat = this.state.getValue('max_lat');
+    var min_lon = this.state.getValue('min_lon');
+    var max_lon = this.state.getValue('max_lon');
     
     var southWest = L.latLng(min_lat, min_lon);
     var northEast = L.latLng(max_lat, max_lon);
@@ -196,20 +217,19 @@ SequenceViewer.prototype.updateFromMapState = function() {
 }
 
 SequenceViewer.prototype.updateFromSequenzeState = function() {
-    var state = new StateManager();
-    var seqId = state.getValue('seqId');
+    var seqId = this.state.getValue('seqId');
     this.showSequence(seqId);
 }
 
 SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, max_lon) {
     var url = "https://a.mapillary.com/v2/search/s?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=1&page="+this.pageNo
     
-    var state = new StateManager();
-    state.setValue('page', this.pageNo);
-    state.setValue('min_lat', min_lat);
-    state.setValue('max_lat', max_lat);
-    state.setValue('min_lon', min_lon);
-    state.setValue('max_lon', max_lon);
+    this.state.clearNonMapState();
+    this.state.setValue('page', this.pageNo);
+    this.state.setValue('min_lat', min_lat);
+    this.state.setValue('max_lat', max_lat);
+    this.state.setValue('min_lon', min_lon);
+    this.state.setValue('max_lon', max_lon);
     
     var self = this;
     $.getJSON(url, function(data) {
