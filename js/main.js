@@ -34,23 +34,29 @@ $(document).ready(function() {
     
     var state = new StateManager();
     if (state.isMapSelected()) {
-        seqViewer.updateSequenceFromState();
+        seqViewer.updateFromMapState();
         $('a[href="#tabSelectOnMap"]').tab('show');
     } else if (state.isSequenceSelected()) {
-        
+        seqViewer.updateFromSequenzeState();
         $('a[href="#tabSelectBySeqId"]').tab('show');
     }
 });
 
 $(document).on('keydown', function (e) {
     if ((e.metaKey || e.altKey) && ( String.fromCharCode(e.which).toLowerCase() === 'n') ) {
-        // TODO: Implement short cuts.
-        console.log( "You pressed alt + n" );
+        $('#nextButton').click();
+        console.log('next');
+    }
+});
+
+$(document).on('keydown', function (e) {
+    if ((e.metaKey || e.altKey) && ( String.fromCharCode(e.which).toLowerCase() === 'p') ) {
+        $('#prevButton').click();
     }
 });
 
 function StateManager() {
-    this.knownKeys = ['page', 'seqID', 'min_lat', 'max_lat', 'min_lon', 'max_lon'];
+    this.knownKeys = ['page', 'seqId', 'min_lat', 'max_lat', 'min_lon', 'max_lon'];
     this.arguments = {};
     this.parseHash();
 }
@@ -63,7 +69,7 @@ StateManager.prototype.isMapSelected = function() {
 }
 
 StateManager.prototype.isSequenceSelected = function() {
-    return this.arguments['seqID'] !== undefined;
+    return this.arguments['seqId'] !== undefined;
 }
 
 StateManager.prototype.parseHash = function() {
@@ -154,7 +160,7 @@ SequenceViewer.prototype.showSequence = function(seqId) {
         var key = seq['keys'];
         self.showImagesByKeys(key);
         var state = new StateManager();
-        state.setValue('seqID', key);
+        state.setValue('seqId', seqId);
     });
 }
 
@@ -170,7 +176,7 @@ SequenceViewer.prototype.updateSequenceForMap = function() {
     this.updateSequence(min_lat, max_lat, min_lon, max_lon);
 }
 
-SequenceViewer.prototype.updateSequenceFromState = function() {
+SequenceViewer.prototype.updateFromMapState = function() {
     var state = new StateManager();
     var pageNoLocal = state.getValue('page');
     this.pageNo = 0;
@@ -187,6 +193,12 @@ SequenceViewer.prototype.updateSequenceFromState = function() {
     var northEast = L.latLng(max_lat, max_lon);
     var bounds = L.latLngBounds(southWest, northEast);
     this.map.fitBounds(bounds);
+}
+
+SequenceViewer.prototype.updateFromSequenzeState = function() {
+    var state = new StateManager();
+    var seqId = state.getValue('seqId');
+    this.showSequence(seqId);
 }
 
 SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, max_lon) {
@@ -206,10 +218,10 @@ SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, ma
         });
         $(".nextPrevBar").empty();
         if (self.pageNo > 0) {
-          var prev = $("<button type=\"button\" class=\"btn btn-link\">Previous</button>").click(function () {
-            self.pageNo--;
-            self.updateSequenceForMap();
-          });
+            var prev = $("<button type=\"button\" class=\"btn btn-link\">Previous</button>").click(function () {
+                self.pageNo--;
+                self.updateSequenceForMap();
+            });
           $(".nextPrevBar").append(prev).append(" - ");
         }
       
