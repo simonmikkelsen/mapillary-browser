@@ -14,10 +14,21 @@ $(document).ready(function() {
         maxZoom: 18
     }).addTo(mymap);
     
+    $(".datepicker").datepicker({
+      changeMonth: true,
+      changeYear: true,
+      dateFormat: 'yy-mm-dd',
+      yearRange: '1900:nn'
+    });
+    
     var seqViewer = new SequenceViewer(mymap);
     
-    $('#showMapImages').click(function() {
+    $('#showMapSequences').click(function() {
         seqViewer.updateSequenceForMap();
+    });
+    
+    $('#showMapImages').click(function() {
+        seqViewer.updateImagesForMap();
     });
     
     $('#fitImagesToWindow').click(function() {
@@ -37,19 +48,22 @@ $(document).ready(function() {
     });
     
     var state = new StateManager();
-    if (state.isMapSelected()) {
+    var method = state.getValue('method');
+    if (method == 'imagesOnMap') {
+        $('a[href="#tabSelectImagesOnMap"]').tab('show');
         seqViewer.updateFromMapState();
-        $('a[href="#tabSelectOnMap"]').tab('show');
+    } else if (method == 'sequencesOnMap') {
+        $('a[href="#tabSelectSequencesOnMap"]').tab('show');
+        seqViewer.updateFromMapState();
     } else if (state.isSequenceSelected()) {
-        seqViewer.updateFromSequenzeState();
         $('a[href="#tabSelectBySeqId"]').tab('show');
+        seqViewer.updateFromSequenzeState();
     }
 });
 
 $(document).on('keydown', function (e) {
     if ((e.metaKey || e.altKey) && ( String.fromCharCode(e.which).toLowerCase() === 'n') ) {
         $('#nextButton').click();
-        console.log('next');
     }
 });
 
@@ -60,9 +74,20 @@ $(document).on('keydown', function (e) {
 });
 
 function StateManager() {
-    this.knownKeys = ['page', 'seqId', 'imageSize', 'min_lat', 'max_lat', 'min_lon', 'max_lon'];
-    this.arguments = {};
     this.parseHash();
+}
+
+StateManager.prototype.removePrefix = function(prefix) {
+    var removeKeys = [];
+    for (var key in this.arguments) {
+        if (key.indexOf(prefix) == 0) {
+            removeKeys[removeKeys.length] = key;
+        }
+    }
+    
+    for (var i = 0; i < removeKeys.length; i++) {
+        delete this.arguments[removeKeys[i]];
+    }
 }
 
 StateManager.prototype.clearNonSequenceState = function() {
@@ -71,17 +96,20 @@ StateManager.prototype.clearNonSequenceState = function() {
     delete this.arguments['min_lon'];
     delete this.arguments['max_lon'];
     delete this.arguments['page'];
+    delete this.arguments['user'];
+    delete this.arguments['startDate'];
+    delete this.arguments['endDate'];
+    this.updateUrlHash();
 }
 
+StateManager.prototype.clearState = function() {
+    this.arguments = {};
+    this.updateUrlHash();
+}
+    
 StateManager.prototype.clearNonMapState = function() {
     delete this.arguments['seqId'];
-}
-
-StateManager.prototype.isMapSelected = function() {
-    return this.arguments['min_lat'] !== undefined
-        && this.arguments['max_lat'] !== undefined
-        && this.arguments['min_lon'] !== undefined
-        && this.arguments['max_lon'] !== undefined;
+    this.updateUrlHash();
 }
 
 StateManager.prototype.isSequenceSelected = function() {
@@ -89,17 +117,15 @@ StateManager.prototype.isSequenceSelected = function() {
 }
 
 StateManager.prototype.parseHash = function() {
+    this.arguments = {};
     if (window.location.hash.length <= 1) {
         return;
     }
     var parts = window.location.hash.substr(1).split('&');
+    
     for (var i = 0; i < parts.length; i++) {
         var kv = parts[i].split('=');
-        if (this.knownKeys.indexOf(kv[0]) >= 0) {
-            this.arguments[kv[0]] = kv[1];
-        } else {
-            console.log('Unknown key/value pair in hash: '+parts[i]);
-        }
+        this.arguments[kv[0]] = kv[1];
     }
 }
 
@@ -107,15 +133,21 @@ StateManager.prototype.getValue = function(key) {
     return this.arguments[key];
 }
 
+StateManager.prototype.removeValue = function(key, value) {
+    delete this.arguments[key];
+    this.updateUrlHash();
+}
+
 StateManager.prototype.setValue = function(key, value) {
+    this.parseHash();
     this.arguments[key] = value;
     this.updateUrlHash();
 }
 
-StateManager.prototype.updateUrlHash = function(key, value) {
+StateManager.prototype.updateUrlHash = function() {
     var hash = '';
     for (var key in this.arguments) {
-        hash += key + '=' + this.arguments[key] + '&';
+        hash += key + '=' + encodeURIComponent(this.arguments[key]) + '&';
     }
     hash = hash.substr(0, hash.length - 1);
     window.location.hash = hash;
@@ -134,8 +166,8 @@ function SequenceViewer(map) {
 SequenceViewer.prototype.fitImagesToWindow = function() {
     var fit = $('#fitImagesToWindow').is(':checked');
     
-    this.state.setValue('fitImages', (fit ? "true" : "false" ))
-    ;
+    this.state.setValue('fitImages', (fit ? "true" : "false" ));
+    
     $(".imageList").each(function(){
         var $img = jQuery(this).find("img");
         if (fit) {
@@ -146,8 +178,16 @@ SequenceViewer.prototype.fitImagesToWindow = function() {
     });
 }
 
+SequenceViewer.prototype.activateUnveil = function(keys) {
+    $(document).ready(function() {
+        $("img").unveil(500, function () {
+            // When an image is unveiled (loaded when almost visible) the approzimate size will be changed to auto again.
+            $(this).css({"width": "auto", "height": "auto"});
+        });
+    });
+}
+
 SequenceViewer.prototype.showImagesByKeys = function(keys) {
-    $('.imageList').remove();
     var imageSize = $('#size').val();
 
     var items = [];
@@ -156,18 +196,31 @@ SequenceViewer.prototype.showImagesByKeys = function(keys) {
         // The unveil plugin can then wait to load images untill they are about to be shown.
         items.push("<a href=\"https://www.mapillary.com/app/?pKey="+val+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""+imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+val+"/thumb-"+imageSize+".jpg\" /></a>");
     });
+    
+    this.addItemsToImageContainer(items);
+    this.activateUnveil();
+}
+
+SequenceViewer.prototype.showImages = function(images) {
+    var imageSize = $('#size').val();
+
+    var items = [];
+    $.each(images , function(i, img) {
+        // Image sizes are only given so the images are located where the probably will be.
+        // The unveil plugin can then wait to load images untill they are about to be shown.
+        items.push("<a href=\"https://www.mapillary.com/app/?pKey="+img['key']+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""+imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+img['key']+"/thumb-"+imageSize+".jpg\" /></a>");
+    });
      
+    this.addItemsToImageContainer(items);
+    this.activateUnveil();
+}
+
+SequenceViewer.prototype.addItemsToImageContainer = function(items) {
+    $('.imageList').remove();
     $( "<div/>", {
         "class": "imageList",
         html: items.join("")
     }).appendTo("#imageContainer");
-      
-    $(document).ready(function() {
-        $("img").unveil(500, function () {
-            // When an image is unveiled (loaded when almost visible) the approzimate size will be changed to auto again.
-            $(this).css({"width": "auto", "height": "auto"});
-        });
-    });
 }
 
 SequenceViewer.prototype.showSequence = function(seqId) {
@@ -182,6 +235,104 @@ SequenceViewer.prototype.showSequence = function(seqId) {
         self.state.clearNonSequenceState();
         self.state.setValue('seqId', seqId);
     });
+}
+
+SequenceViewer.prototype.getSelectedTabID = function() {
+    return $("#tabsSelectBy li.active a").attr('href');
+}
+
+SequenceViewer.prototype.getUrlArgsForOptions = function() {
+    var containerID = this.getSelectedTabID();
+    var startDate = $(containerID+" .startDate").datepicker("getDate");
+    var endDate = $(containerID+" .endDate").datepicker("getDate");
+    var extraArgs = "";
+    if (startDate !== null) {
+        extraArgs += "&start_time="+startDate.getTime();
+    }
+    if (endDate !== null) {
+        extraArgs += "&end_time="+endDate.getTime();
+    }
+    var user = $(containerID+" .userField").val();
+    if (user !== undefined && user.trim().length > 0) {
+        extraArgs += "&user="+encodeURIComponent(user);
+    }
+    return extraArgs;
+}
+
+SequenceViewer.prototype.setUrlArgsInState = function() {
+    var containerID = this.getSelectedTabID();
+    
+    var startDate = $(containerID+" .startDate").datepicker("getDate");
+    var endDate = $(containerID+" .endDate").datepicker("getDate");
+    var user = $(containerID+" .userField").val();
+    
+    if (startDate !== null) {
+        this.state.setValue('startDate', startDate.getTime());
+    } else {
+        this.state.removeValue('startDate');
+    }
+    
+    if (endDate !== null) {
+        this.state.setValue('endDate', endDate.getTime());
+    } else {
+        this.state.removeValue('endDate');
+    }
+    
+    if (user !== undefined && user.trim().length > 0) {
+        this.state.setValue('user', user);
+    } else {
+        this.state.removeValue('user');
+    }
+}
+
+SequenceViewer.prototype.updateImagesForMap = function() {
+    var area = this.map.getBounds();
+    var sw = area.getSouthWest();
+    var ne = area.getNorthEast();
+    
+    var min_lat = sw.lat;
+    var max_lat = ne.lat;
+    var min_lon = sw.lng;
+    var max_lon = ne.lng;
+    
+    var extraArgs = this.getUrlArgsForOptions();
+    
+    var url = "https://a.mapillary.com/v2/search/im?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=500&page="+this.pageNo+""+extraArgs;
+    
+    this.state.clearState();
+    this.setUrlArgsInState();
+    this.state.setValue('page', this.pageNo);
+    this.state.setValue('min_lat', min_lat);
+    this.state.setValue('max_lat', max_lat);
+    this.state.setValue('min_lon', min_lon);
+    this.state.setValue('max_lon', max_lon);
+    this.state.setValue('method', 'imagesOnMap');
+    
+    var self = this;
+    $.getJSON(url, function(data) {
+        self.showImages(data['ims']);
+        self.updateNextPrev(data['more']);
+    });
+}
+
+SequenceViewer.prototype.updateNextPrev = function(isMoreData) {
+    $(".nextPrevBar").empty();
+    var self = this;
+    if (this.pageNo > 0) {
+        var prev = $("<button type=\"button\" class=\"btn btn-link\">Previous</button>").click(function () {
+            self.pageNo--;
+            self.updateSequenceForMap();
+        });
+      $(".nextPrevBar").append(prev).append(" - ");
+    }
+  
+    if (isMoreData === true) {
+        var next = $("<button type=\"button\" class=\"btn btn-link\">Next</button>").click(function () {
+            self.pageNo++;
+            self.updateSequenceForMap();
+        });
+        $(".nextPrevBar").append(next);;
+    }
 }
 
 SequenceViewer.prototype.updateSequenceForMap = function() {
@@ -212,6 +363,21 @@ SequenceViewer.prototype.updateFromMapState = function() {
     var northEast = L.latLng(max_lat, max_lon);
     var bounds = L.latLngBounds(southWest, northEast);
     this.map.fitBounds(bounds);
+   
+    var user = this.state.getValue('user');
+    var startDate = this.state.getValue('startDate');
+    var endDate = this.state.getValue('endDate');
+
+    var containerID = this.getSelectedTabID();
+    if (startDate !== undefined && startDate > 0) {
+        $(containerID+" .startDate").datepicker("setDate", new Date(startDate));
+    }
+    if (endDate !== undefined && endDate > 0) {
+        $(containerID+" .endDate").datepicker("setDate", new Date(endDate));
+    }
+    if (user !== undefined && user.trim().length > 0) {
+        $(containerID+" .userField").val(user);
+    }
 }
 
 SequenceViewer.prototype.updateFromSequenzeState = function() {
@@ -220,35 +386,23 @@ SequenceViewer.prototype.updateFromSequenzeState = function() {
 }
 
 SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, max_lon) {
-    var url = "https://a.mapillary.com/v2/search/s?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=1&page="+this.pageNo
+    var extraArgs = this.getUrlArgsForOptions();
+    var url = "https://a.mapillary.com/v2/search/s?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=1&page="+this.pageNo+extraArgs
     
-    this.state.clearNonMapState();
+    this.state.clearState();
+    this.setUrlArgsInState();
     this.state.setValue('page', this.pageNo);
     this.state.setValue('min_lat', min_lat);
     this.state.setValue('max_lat', max_lat);
     this.state.setValue('min_lon', min_lon);
     this.state.setValue('max_lon', max_lon);
+    this.state.setValue('method', 'sequencesOnMap');
     
     var self = this;
     $.getJSON(url, function(data) {
         $.each(data['ss'], function(key, seq) {
            self.showImagesByKeys(seq['keys']);
         });
-        $(".nextPrevBar").empty();
-        if (self.pageNo > 0) {
-            var prev = $("<button type=\"button\" class=\"btn btn-link\">Previous</button>").click(function () {
-                self.pageNo--;
-                self.updateSequenceForMap();
-            });
-          $(".nextPrevBar").append(prev).append(" - ");
-        }
-      
-        if (data['more'] === true) {
-            var next = $("<button type=\"button\" class=\"btn btn-link\">Next</button>").click(function () {
-                self.pageNo++;
-                self.updateSequenceForMap();
-            });
-            $(".nextPrevBar").append(next);;
-        }
+        self.updateNextPrev(data['more']);
     });
 }

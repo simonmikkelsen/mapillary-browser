@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/mbrowser.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
 
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
         <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
@@ -28,9 +29,10 @@
                 <div class="col-md-8">
                 
                     <div id="tabsSelectBy">
-                        <ul  class="nav nav-pills">
-                            <li class="active"><a href="#tabSelectOnMap" data-toggle="tab">Select on map</a></li>
-                            <li><a href="#tabSelectBySeqId" data-toggle="tab">Select by sequence ID</a></li>
+                        <ul class="nav nav-pills">
+                            <li class="active"><a href="#tabSelectSequencesOnMap" data-toggle="tab">Sequences on map</a></li>
+                            <li><a href="#tabSelectImagesOnMap" data-toggle="tab">Images on map</a></li>
+                            <li><a href="#tabSelectBySeqId" data-toggle="tab">By sequence ID</a></li>
                             <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
                         </ul>
 
@@ -40,10 +42,16 @@
                                 Sequence ID: <input type="text" value="XXhG1IuvngsFAw-zRrk6cg" size="25" id="sequenceID" />
                                 <input type="button" value="Show sequence" id="showSequence" />
                             </div>
-                            <div class="tab-pane active" id="tabSelectOnMap">
-                                <h4>Select images by map</h4>
+                            <div class="tab-pane active" id="tabSelectSequencesOnMap">
+                                <h4>Select sequences by map</h4>
                                 <p>Zoom and move the map to only show the area you want to get images from. This will find all sequence which bounding box falls overlaps the selected area. If the sequence goes around the area, it may not contain images within the selected area. In the future it might be possible to select an area (pleae make a pull request).</p>
-                                <div id="xmapid"></div>
+                                <p>Start date: <input type="text" class="datepicker startDate"> End date: <input type="text" class="datepicker endDate"> User: <input type="text" class="userField"></p>
+                                <input type="button" value="Show images from map" id="showMapSequences" />
+                            </div>
+                            <div class="tab-pane" id="tabSelectImagesOnMap">
+                                <h4>Select images by map</h4>
+                                <p>Zoom and move the map to only show the area you want to get images from. This will find all images within the area not taking sequences into account.</p>
+                                <p>Start date: <input type="text" class="datepicker startDate"> End date: <input type="text" class="datepicker endDate"> User: <input type="text" class="userField"></p>
                                 <input type="button" value="Show images from map" id="showMapImages" />
                             </div>
                             <div class="tab-pane" id="tabOptions">
@@ -71,6 +79,7 @@
     
         <!-- script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="js/vendor/jquery.unveil.js"></script>
         <script src="js/keys.js"></script>
