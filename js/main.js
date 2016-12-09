@@ -14,6 +14,11 @@ $(document).ready(function() {
         maxZoom: 18
     }).addTo(mymap);
     
+    /*L.tileLayer('https://d6a1v2w10ny40.cloudfront.net/v0.1/{z}/{x}/{y}.png', {
+		maxZoom: 17,
+		id: 'mapillary.sequences'
+	}).addTo(mymap);*/
+    
     $(".datepicker").datepicker({
       changeMonth: true,
       changeYear: true,
@@ -161,6 +166,11 @@ function SequenceViewer(map) {
     this.min_lon = -1;
     this.max_lon = -1;
     this.state = new StateManager();
+    
+    this.metadata = null;
+    if (typeof MetaData != 'undefined') {
+        this.metadata = new MetaData();
+    }
 }
 
 SequenceViewer.prototype.fitImagesToWindow = function() {
@@ -187,14 +197,31 @@ SequenceViewer.prototype.activateUnveil = function(keys) {
     });
 }
 
+SequenceViewer.prototype.getImageLink = function(imageKey, imageSize) {
+    // Image sizes are only given so the images are located where the probably will be.
+    // The unveil plugin can then wait to load images untill they are about to be shown.
+    
+    return "<div class=\"imageBox\">"
+        + "<a href=\"https://www.mapillary.com/app/?pKey="+imageKey+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""
+        + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a>"
+        + "<div class=\"metaDataBox\">"
+        + "<form>"
+        + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
+        + "     <button type=\"button\" class=\"btn btn-default saveButton\">Save</button>"
+        + "     <button type=\"button\" class=\"btn btn-default addButton\">Add</button>"
+        + "     <span class=\"fa fa-spinner fa-spin spinner\" style=\"font-size:24px; display: none\"></span>"
+        + "</form>"
+        + "</div>"
+        + "</div>";
+}
+
 SequenceViewer.prototype.showImagesByKeys = function(keys) {
     var imageSize = $('#size').val();
 
     var items = [];
+    var self = this;
     $.each(keys , function(key, val) {
-        // Image sizes are only given so the images are located where the probably will be.
-        // The unveil plugin can then wait to load images untill they are about to be shown.
-        items.push("<a href=\"https://www.mapillary.com/app/?pKey="+val+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""+imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+val+"/thumb-"+imageSize+".jpg\" /></a>");
+        items.push(self.getImageLink(val, imageSize));
     });
     
     this.addItemsToImageContainer(items);
@@ -205,10 +232,9 @@ SequenceViewer.prototype.showImages = function(images) {
     var imageSize = $('#size').val();
 
     var items = [];
+    var self = this;
     $.each(images , function(i, img) {
-        // Image sizes are only given so the images are located where the probably will be.
-        // The unveil plugin can then wait to load images untill they are about to be shown.
-        items.push("<a href=\"https://www.mapillary.com/app/?pKey="+img['key']+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""+imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+img['key']+"/thumb-"+imageSize+".jpg\" /></a>");
+        items.push(self.getImageLink(img['key'], imageSize));
     });
      
     this.addItemsToImageContainer(items);
@@ -221,6 +247,9 @@ SequenceViewer.prototype.addItemsToImageContainer = function(items) {
         "class": "imageList",
         html: items.join("")
     }).appendTo("#imageContainer");
+    if (this.metadata !== null) {
+        this.metadata.buttonsAdded();
+    }
 }
 
 SequenceViewer.prototype.showSequence = function(seqId) {

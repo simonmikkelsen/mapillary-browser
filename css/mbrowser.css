@@ -21,3 +21,12 @@
 .userField {
     width: 7em;
 }
+
+/*Hide online metadata parts. They are shown if the style sheet for metadata is included.*/
+.metaData, .metaDataBox {
+    display: none;
+}
+
+.imageBox {
+    float: left;
+}

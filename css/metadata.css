@@ -1,0 +1,25 @@
+.metaData {
+    display: inherit;
+}
+
+.imageBox {
+    
+}
+
+.expandButton {
+    float: right;
+    cursor: pointer;
+}
+
+.metaDataBox {
+    background-color: #DDD;
+    margin-bottom: 0.5em;
+    padding: 2px;
+}
+
+.metaDataBox .key {
+    width: 7em;
+}
+.metaDataBox .value {
+    width: 12em;
+}
