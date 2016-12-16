@@ -23,7 +23,7 @@
 }
 
 /*Hide online metadata parts. They are shown if the style sheet for metadata is included.*/
-.metaData, .metaDataBox {
+.metaData, .metaDataBox, .tabSearchHeader {
     display: none;
 }
 

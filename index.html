@@ -34,6 +34,7 @@
                             <li class="active"><a href="#tabSelectSequencesOnMap" data-toggle="tab">Sequences on map</a></li>
                             <li><a href="#tabSelectImagesOnMap" data-toggle="tab">Images on map</a></li>
                             <li><a href="#tabSelectBySeqId" data-toggle="tab">By sequence ID</a></li>
+                            <li id="tabSearchHeader"><a href="#tabSearch" data-toggle="tab">Search</a></li>
                             <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
                         </ul>
 
@@ -54,6 +55,26 @@
                                 <p>Zoom and move the map to only show the area you want to get images from. This will find all images within the area not taking sequences into account.</p>
                                 <p>Start date: <input type="text" class="datepicker startDate"> End date: <input type="text" class="datepicker endDate"> User: <input type="text" class="userField"></p>
                                 <input type="button" value="Show images from map" id="showMapImages" />
+                            </div>
+                            <div class="tab-pane" id="tabSearch">
+                                <h4>Search for images</h4>
+                                <form id="searchForm">
+                                    <div class="searchParam" id="searchParamTemplate">
+                                        <input type="text" class="key">
+                                            <select class="operator">
+                                                <option>equals</option>
+                                                <option>contains</option>
+                                                <option>&lt;</option>
+                                                <option>&gt;</option>
+                                                <option>not equals</option>
+                                                <option>not contains</option>
+                                            </select>
+                                        <input type="text" class="value">
+                                        <button type="button" class="btn btn-default glyphicon glyphicon-remove removeButton"></button>
+                                    </div>
+                                    <button type="button" class="btn btn-default searchButton">Search</button>
+                                    <button type="button" class="btn btn-default addButton">Add parameter</button>
+                                </form>
                             </div>
                             <div class="tab-pane" id="tabOptions">
                                 <div>Image width: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select></div>

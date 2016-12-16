@@ -27,6 +27,7 @@ $(document).ready(function() {
     });
     
     var seqViewer = new SequenceViewer(mymap);
+    window.seqViewer = seqViewer;
     
     $('#showMapSequences').click(function() {
         seqViewer.updateSequenceForMap();

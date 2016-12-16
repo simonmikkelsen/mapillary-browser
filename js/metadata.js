@@ -1,9 +1,9 @@
 "use strict";
 $(document).ready(function() {
+    var metadata = new MetaData();
     $('#showTagBox').click(function() {
         var show = $('#showTagBox').is(':checked');
         if (show) {
-            var metadata = new MetaData();
             metadata.populateTags();
             $('.metaDataBox').show();
         } else {
@@ -12,10 +12,55 @@ $(document).ready(function() {
         }
     });
     
+    $('#searchForm .addButton').click(function(){
+        metadata.addSearchParameter();
+    });
+    metadata.addSearchParameter();
+    
+    $('#searchForm .searchButton').click(function(){
+        var searchParameters = [];
+        $(this).parent().find('.searchParam').each(function(i, searchParam){
+            var key = $(searchParam).find('.key').val();
+            var operator = $(searchParam).find('.operator').val();
+            var value = $(searchParam).find('.value').val();
+            if (key === "" || value === "") {
+                return;
+            }
+            searchParameters.push({'key':key, 'op':operator, 'value':value});
+        });
+        
+        var searchJson = JSON.stringify(searchParameters);
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost:7788/browser/api/search.py',
+            data: searchJson,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        }).done(function(imageKeys) {
+            $('.searchButton').parent().find('.spinner').show();
+            $('.searchButton').hide();
+            window.seqViewer.showImagesByKeys(imageKeys);
+            
+        }).fail(function (){
+            // TODO: Make proper error handling.
+            console.log('fail');
+        }).always(function(){
+            $('.searchButton').parent().find('.spinner').hide();
+            $('.searchButton').show();
+        });
+    });
+    
 });
 
 function MetaData() {
     
+}
+
+MetaData.prototype.addSearchParameter = function() {
+    var template = $('#searchParamTemplate');
+    var searchParam = template.clone();
+    searchParam.removeAttr('id');
+    $('#searchForm .searchButton').before(searchParam);
 }
 
 MetaData.prototype.renderTagPair = function(key, value) {
@@ -83,7 +128,7 @@ MetaData.prototype.buttonsAdded = function(prefix) {
         var data = self.getTagData(button);
         $.ajax({
             type: "POST",
-            url: 'http://localhost:7788/browser/api/test2.py',
+            url: 'http://localhost:7788/browser/api/saveTags.py',
             data: data,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -92,6 +137,7 @@ MetaData.prototype.buttonsAdded = function(prefix) {
             $('.saveButton').hide()
             console.log('ok');
         }).fail(function (){
+            // TODO: Make proper error handling.
             console.log('fail');
         }).always(function(){
             $('.saveButton').parent().find('.spinner').hide()

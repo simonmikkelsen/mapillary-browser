@@ -1,9 +1,22 @@
 #!/usr/bin/env python
 
+import os.path
+import sys
 import mysql.connector
 
+EXTRA_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
+if EXTRA_DIR not in sys.path:
+    sys.path.append(EXTRA_DIR)
+
+import config
+
 class MySQLDAO:
-    def __init__(self, user, password, host, database):
+    def __init__(self):
+        c = config.DbConfig()
+        user = c.getUsername()
+        password = c.getPassword()
+        host = c.getHost()
+        database = c.getDatabase()
         self.cnx = mysql.connector.connect(user = user, password = password, host = host, database = database)
         self.cursor = self.cnx.cursor()
     def close(self):
@@ -32,6 +45,47 @@ class MySQLDAO:
     def execute(self, query, data):
         self.cursor.execute(query, data)
         return self.cursor.lastrowid
+
+class SearchDAO:
+    def __init__(self, dao):
+        self.dao = dao
+    def search(self, params):
+        # Example of params: [{key: "somekey", op: "equals", value: "somevalue"}]
+        sql = "SELECT DISTINCT image.mapillary_key FROM tag, image WHERE tag.image = image.id"
+        data = []
+        sql_params = ""
+        for p in params:
+            key = p['key']
+            operator = self.get_operator_by_string(p['op'])
+            value = p['value']
+            if not self.is_search_param_useable(key, operator, value):
+                continue
+            if operator.endswith('like'):
+                value = '%' + value + '%'
+            data += [key, value]
+            sql_params = " AND tag.keytext = %s AND tag.value " + operator + " %s"
+        sql += sql_params
+        return self.dao.select(sql, tuple(data))
+        
+            
+    def is_search_param_useable(self, key, operator, value):
+        return len(key.strip()) > 0 and operator != None and len(value.strip()) > 0
+    def get_operator_by_string(self, operator):
+        if operator == "equals":
+            return "="
+        elif operator == "contains":
+            return "like"
+        elif operator == "<":
+            return "<"
+        elif operator == ">":
+            return ">"
+        elif operator == "not equals":
+            return "!="
+        elif operator == "not contains":
+            return "not like"
+        else:
+            return None
+        
         
 class ImageDAO:
     def __init__(self, dao):

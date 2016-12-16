@@ -20,10 +20,10 @@ except ImportError:
     print("requests not found - please run: pip install requests")
     sys.exit()
 
-def get_tags(image_keys):
+def search(searchParams):
     mysql = dao.MySQLDAO()
-    tag_dao = dao.TagDAO(mysql)
-    return tag_dao.get_tags_for_image_keys(image_keys)
+    search_dao = dao.SearchDAO(mysql)
+    return search_dao.search(searchParams)
     
         
 def application (environ, start_response):
@@ -36,9 +36,9 @@ def application (environ, start_response):
     response_body = ""
     
     request_body = environ['wsgi.input'].read(request_body_size)
-    keys = json.loads(request_body)
-    tags = get_tags(keys)
-    response_body = json.dumps(tags)
+    searchParams = json.loads(request_body)
+    result = search(searchParams)
+    response_body = json.dumps(result)
     
     status = '200 OK'
     
@@ -51,6 +51,4 @@ def application (environ, start_response):
     return [response_body]
 
 if __name__ == '__main__':
-    image_key = 'YqfCPKsmgXh40NPmI_wuEQ'
-    print str(get_tags([image_key]))
-    
+    print search([{'key': "t11", 'op': "equals", 'value': "v11"}])

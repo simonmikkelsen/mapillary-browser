@@ -18,7 +18,7 @@ def application (environ, start_response):
     # d = parse_qs(environ['QUERY_STRING'])
     
     client_id = 'Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5ODcxYTgzMTgzNzVhMTNi'
-    url = 'http://www.mapillary.com/connect?'+urllib.urlencode({'client_id':client_id, 'response_type':'token', 'scope':'user:read', 'state':'return', 'redirect_uri':'http://zip.dk/mapillary/'})
+    url = 'http://www.mapillary.com/connect?'+urllib.urlencode({'client_id':client_id, 'response_type':'token', 'scope':'user:read', 'state':'return', 'redirect_uri':'http://zip.dk/mapillary'})
     #http://www.mapillary.com/connect?scope=user%3Aread&state=return&redirect_uri=http%3A%2F%2Flocalhost%3A7788%2Ftest.py&response_type=token&client_id=Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5ODcxYTgzMTgzNzVhMTNi
     if len(environ['QUERY_STRING']) == 0:
         response_headers = [
@@ -43,3 +43,4 @@ def application (environ, start_response):
 
     start_response(status, response_headers)
     return [response_body]
+ 

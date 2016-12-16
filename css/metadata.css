@@ -1,5 +1,9 @@
-.metaData {
+.metaData, .tabSearchHeader {
     display: inherit;
+}
+
+#searchParamTemplate {
+    display: none;
 }
 
 .imageBox {
