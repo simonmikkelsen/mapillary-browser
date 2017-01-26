@@ -45,7 +45,43 @@ class MySQLDAO:
     def execute(self, query, data):
         self.cursor.execute(query, data)
         return self.cursor.lastrowid
+    def get_var_arg_format_strings(self, count):
+        return ','.join(['%s'] * count)
 
+class ListDAO:
+    def __init__(self, dao):
+        self.dao = dao
+    def get_list_contents(self, current_user, list_names):
+        format_strings = self.dao.get_var_arg_format_strings(len(list_names))
+        sql = ("SELECT DISTINCT image_list.name, image.mapillary_key FROM image_list_item, image_list, user, image WHERE user.user = %s AND image_list.user = user.id AND"
+               " image_list.name in ({list_replacements}) AND image_list_item.list = image_list.id AND image_list_item.image = image.id").format(list_replacements=format_strings)
+        
+        return self.dao.select(sql, (current_user,)+tuple(list_names))
+class ListDAO:
+    def __init__(self, dao):
+        self.dao = dao
+    def ensure_list(self, user_name, list_name):
+        sql = "INSERT IGNORE INTO image_list (name, user, public, locked) VALUES (%s, (SELECT id FROM user WHERE user.user = %s), %s, %s)"
+        self.dao.execute(sql, (list_name, user_name, 1, 0))
+    def ensure_on_list(self, user_name, list_name, mapillary_keys):
+        if len(mapillary_keys) == 0:
+            return
+        format_strings = self.dao.get_var_arg_format_strings(len(mapillary_keys))
+        sql = ("INSERT IGNORE INTO image_list_item (image, list) "
+                 "SELECT image.id, image_list.id FROM image, user, image_list WHERE "
+                 "mapillary_key IN ({list_replacements}) AND image_list.name = %s AND image_list.user = user.id AND user.user = %s").format(list_replacements=format_strings)
+        self.dao.execute(sql, tuple(mapillary_keys) + (list_name, user_name))
+    def ensure_off_list(self, user_name, list_name, mapillary_keys):
+        if len(mapillary_keys) == 0:
+            return
+        format_strings = self.dao.get_var_arg_format_strings(len(mapillary_keys))
+        sql = ("DELETE image_list_item FROM image_list_item "
+                      "INNER JOIN image      ON image_list_item.image = image.id "
+                      "INNER JOIN image_list ON image_list_item.list = image_list.id "
+                      "INNER JOIN user       ON image_list.user = user.id "
+                      "WHERE image.mapillary_key in ({list_replacements}) AND image_list.name = %s AND user.user = %s").format(list_replacements=format_strings)
+        self.dao.execute(sql, tuple(mapillary_keys) + (list_name, user_name))
+        
 class SearchDAO:
     def __init__(self, dao):
         self.dao = dao
@@ -113,14 +149,14 @@ class TagDAO:
         return self.dao.select(sql, data)
 
     def get_tags_for_image_keys(self, keys):
-        format_strings = ','.join(['%s'] * len(keys))
+        format_strings = self.dao.get_var_arg_format_strings(len(keys))
         sql = "SELECT image.mapillary_key, tag.keytext, tag.value FROM image, tag WHERE image.mapillary_key in (%s) AND tag.image = image.id" % format_strings
         data = tuple(keys)
         return self.dao.select(sql, data)
         
     def delete_tags_not_in(self, image_id, keys):
         """ Deletes all tags which key is not in the given list."""
-        format_strings = ','.join(['%s'] * len(keys))
+        format_strings = self.dao.get_var_arg_format_strings(len(keys))
         #                                    This %s is inserted litterally to be replaced by image_id by the MySQL driver.
         #                                                                 This %s will be replaced by format_strings which are the keys. These are also replaced by data in MySQL.
         sql = "DELETE from tag WHERE image = %s" + (" AND keytext NOT IN (%s)" % format_strings)

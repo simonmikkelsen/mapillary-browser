@@ -27,3 +27,7 @@
 .metaDataBox .value {
     width: 12em;
 }
+
+.selected {
+    color: red;
+}

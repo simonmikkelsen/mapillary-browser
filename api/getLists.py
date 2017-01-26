@@ -20,10 +20,10 @@ except ImportError:
     print("requests not found - please run: pip install requests")
     sys.exit()
 
-def get_tags(image_keys):
+def get_list_contents(current_user, list_name):
     mysql = dao.MySQLDAO()
-    tag_dao = dao.TagDAO(mysql)
-    return tag_dao.get_tags_for_image_keys(image_keys)
+    list_dao = dao.ListDAO(mysql)
+    return list_dao.get_list_contents(current_user, list_name)
     
         
 def application(environ, start_response):
@@ -35,10 +35,15 @@ def application(environ, start_response):
 
     response_body = ""
     
+    # TODO: Replace by a logged in user.
+    current_user = "tryl"
+    
     request_body = environ['wsgi.input'].read(request_body_size)
-    keys = json.loads(request_body)
-    tags = get_tags(keys)
-    response_body = json.dumps(tags)
+    args = json.loads(request_body)
+    list_names = args['lists']
+    
+    list_contents = get_list_contents(current_user, list_names)
+    response_body = json.dumps(list_contents)
     
     status = '200 OK'
     
@@ -51,6 +56,5 @@ def application(environ, start_response):
     return [response_body]
 
 if __name__ == '__main__':
-    image_key = 'YqfCPKsmgXh40NPmI_wuEQ'
-    print str(get_tags([image_key]))
+    print str(get_list_contents('tryl', ['--favorites', '--upvotes']))
     

@@ -167,6 +167,8 @@ function SequenceViewer(map) {
     this.min_lon = -1;
     this.max_lon = -1;
     this.state = new StateManager();
+    this.imageLoadedListeners = [];
+    this.unveilListeners = [];
     
     this.metadata = null;
     if (typeof MetaData != 'undefined') {
@@ -190,10 +192,12 @@ SequenceViewer.prototype.fitImagesToWindow = function() {
 }
 
 SequenceViewer.prototype.activateUnveil = function(keys) {
+    var self = this;
     $(document).ready(function() {
         $("img").unveil(500, function () {
             // When an image is unveiled (loaded when almost visible) the approzimate size will be changed to auto again.
             $(this).css({"width": "auto", "height": "auto"});
+            self.imageUnveiled(this);
         });
     });
 }
@@ -203,8 +207,13 @@ SequenceViewer.prototype.getImageLink = function(imageKey, imageSize) {
     // The unveil plugin can then wait to load images untill they are about to be shown.
     
     return "<div class=\"imageBox\">"
-        + "<a href=\"https://www.mapillary.com/app/?pKey="+imageKey+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""
-        + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a>"
+        + "<div class=\"image\"><a href=\"https://www.mapillary.com/app/?pKey="+imageKey+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""
+        + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a></div>"
+        + "<div class=\"list-icons\">"
+        + " <span class=\"glyphicon glyphicon-heart-empty favorite\" ></span>"
+        + " <span class=\"glyphicon glyphicon-thumbs-up up\" ></span>"
+        + " <span class=\"glyphicon glyphicon-thumbs-down down\" ></span>"
+        + "</div>"
         + "<div class=\"metaDataBox\">"
         + "<form>"
         + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
@@ -264,6 +273,7 @@ SequenceViewer.prototype.showSequence = function(seqId) {
         self.showImagesByKeys(key);
         self.state.clearNonSequenceState();
         self.state.setValue('seqId', seqId);
+        self.imagesLoaded();
     });
 }
 
@@ -342,6 +352,7 @@ SequenceViewer.prototype.updateImagesForMap = function() {
     $.getJSON(url, function(data) {
         self.showImages(data['ims']);
         self.updateNextPrev(data['more']);
+        self.imagesLoaded();
     });
 }
 
@@ -415,6 +426,28 @@ SequenceViewer.prototype.updateFromSequenzeState = function() {
     this.showSequence(seqId);
 }
 
+SequenceViewer.prototype.addImagesLoadedListener = function(toAdd) {
+    this.imageLoadedListeners.push(toAdd);
+}
+// TODO: Remove images loaded listener
+SequenceViewer.prototype.imagesLoaded = function() {
+    var i;
+    for (i = 0; i < this.imageLoadedListeners.length; i++) {
+        this.imageLoadedListeners[i]();
+    }
+}
+
+SequenceViewer.prototype.addUnveilListener = function(toAdd) {
+    this.unveilListeners.push(toAdd);
+}
+
+SequenceViewer.prototype.imageUnveiled = function(image) {
+    var i;
+    for (i = 0; i < this.unveilListeners.length; i++) {
+        this.unveilListeners[i](image);
+    }
+}
+
 SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, max_lon) {
     var extraArgs = this.getUrlArgsForOptions();
     var url = "https://a.mapillary.com/v2/search/s?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=1&page="+this.pageNo+extraArgs
@@ -434,5 +467,6 @@ SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, ma
            self.showImagesByKeys(seq['keys']);
         });
         self.updateNextPrev(data['more']);
+        self.imagesLoaded();
     });
 }
