@@ -1,0 +1,219 @@
+<html>
+<head>
+    <link rel="stylesheet" href="darkroom/darkroom.css">
+
+    <script src="fabric.min.js"></script>
+    <script src="bezier.min.github.js"></script>
+    <script src="main2.js"></script>
+
+</head>
+<body>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+        <div class="figure-wrapper">
+          <figure class="image-container target">
+            <img src="WuxsiFtGcY0b4bkj3sDjag_thumb-640.jpg" id="target">
+          </figure>
+        </div>
+
+<script src="darkroom/darkroom/build/darkroom.js"></script>
+
+  <script>
+    var dkrm = new Darkroom('#target', {
+      // Size options
+      minWidth: 100,
+      minHeight: 100,
+      maxWidth: 600,
+      maxHeight: 500,
+      ratio: 4/3,
+      backgroundColor: '#000',
+      // Plugins options
+      plugins: {
+        //save: false,
+        crop: {
+          quickCropKey: 67, //key "c"
+          //minHeight: 50,
+          //minWidth: 50,
+          //ratio: 4/3
+        }
+      },
+      // Post initialize script
+      initialize: function() {
+        var cropPlugin = this.plugins['crop'];
+        // cropPlugin.selectZone(170, 25, 300, 300);
+        cropPlugin.requireFocus();
+      }
+    });
+  </script>
+
+
+<canvas id="c" width="660" height="500"></canvas>
+
+<div class="controls">
+  <p>
+    <label><span>Adjust:</span>
+    <label>Dark point: <input type="range" id="adjust-dark-point" value="0" min="-50" max="50" ></label>
+    <label>Shadows: <input type="range" id="adjust-shadows" value="0" min="-50" max="50" disabled></label>
+    <label>Midtones: <input type="range" id="adjust-midtones" value="0" min="-50" max="50" disabled></label>
+    <label>Highlightes: <input type="range" id="adjust-highlightes" value="0" min="-50" max="50" disabled></label>
+    <label>Bright point: <input type="range" id="adjust-bright-point" value="0" min="-50" max="50" disabled></label>
+  </p>
+
+  <p>
+    <!-- label>Auto exposure: <input type="range" id="autoexposure-value" value="0" min="-50" max="100" disabled></label>
+    <br -->
+    <label>Brightness: <input type="range" id="brightness-value" value="0" min="-255" max="255" disabled></label>
+    <br>
+    <label>Contrast: <input type="range" id="contrast-value" value="0" min="-255" max="255" disabled></label>
+    <br>
+    <label>Saturate: <input type="range" id="saturate-value" value="0" min="-100" max="100" disabled></label>
+    <br>
+    <label>Sharpen: <input type="range" id="sharpen-value" value="0" min="0.0" step="0.01" max="1" disabled></label>
+    <br>
+    <label>Rotate: <input type="range" id="rotate" value="0" min="-10.0" step="0.1" max="10" disabled></label>
+    <br>
+    <label>Zoom: <input type="range" id="scale-control" value="1" min="1.0" step="0.01" max="1.5" disabled></label>
+  </p>
+    
+</div>
+
+    <script>
+    (function() {
+  fabric.Object.prototype.transparentCorners = false;
+  fabric.Object.prototype.padding = 5;
+  fabric.Object.prototype.hasControls  = false;
+  fabric.Object.prototype.hasRotatingPoint = false;
+  fabric.Object.prototype.lockMovementX = true;
+  fabric.Object.prototype.lockMovementY = true;
+  fabric.Object.prototype.lockRotation = true;
+  fabric.Object.prototype.lockScalingFlip = true;
+  fabric.Object.prototype.lockScalingX = true;
+  fabric.Object.prototype.lockScalingY = true;
+  fabric.Object.prototype.lockSkewingX = true;
+  fabric.Object.prototype.lockSkewingY = true;
+  fabric.Object.prototype.selectable = false;
+
+  var $ = function(id){return document.getElementById(id)};
+
+  var canvas = this.__canvas = new fabric.Canvas('c'),
+      f = fabric.Image.filters;
+
+  function applyFilter(index, filter) {
+    var obj = canvas.getActiveObject();
+    obj.filters[index] = filter;
+    obj.applyFilters(canvas.renderAll.bind(canvas));
+  }
+
+  function initFilter(index, filter) {
+    var obj = canvas.getActiveObject();
+    obj.filters[index] = filter;
+  }
+
+  function applyFilterValue(index, prop, value) {
+    var obj = canvas.getActiveObject();
+    if (obj.filters[index]) {
+      obj.filters[index][prop] = value;
+      obj.applyFilters(canvas.renderAll.bind(canvas));
+    }
+  }
+  
+  function getSharpenMatrix(val) {
+    return [0,         -val,    0,
+         -val,  1 + val * 4, -val,
+            0,         -val,     0];
+  }
+
+  canvas.on({
+    'object:selected': function() {
+      fabric.util.toArray(document.getElementsByTagName('input'))
+                          .forEach(function(el){ el.disabled = false; })
+
+      var filters = ['brightness', 'contrast', 'saturate', 'sharpen', 'autoexposure'];
+    },
+    'selection:cleared': function() {
+      fabric.util.toArray(document.getElementsByTagName('input'))
+                          .forEach(function(el){ el.disabled = true; })
+    }
+});
+  
+  initFilters = function() {
+    initFilter(0, new f.Brightness({
+      brightness: parseInt($('brightness-value').value, 10)
+    }));
+    
+    initFilter(1, new f.Contrast({
+      contrast: parseInt($('contrast-value').value, 10)
+    }));
+    
+    initFilter(2, new f.Saturate({
+      saturate: parseInt($('saturate-value').value, 10)
+    }));
+    
+    initFilter(3, new f.Convolute({
+      matrix: getSharpenMatrix(parseFloat($('sharpen-value').value))
+    }));
+    
+    //initFilter(5, new f.AutoExposure({
+    //  exposureCompensation: parseInt($('autoexposure-value').value, 10)
+    //}));
+  }
+  
+  fabric.Image.fromURL('WuxsiFtGcY0b4bkj3sDjag_thumb-640.jpg', function(img) {
+    var oImg = img.set({ left: 10, top: 10, angle: 0 });
+    canvas.add(oImg).renderAll();
+    canvas.setActiveObject(oImg);
+    initFilters();
+  });
+  $('brightness-value').onchange = function() {
+    applyFilterValue(0, 'brightness', parseInt(this.value, 10));
+  };
+  $('contrast-value').onchange = function() {
+    applyFilterValue(1, 'contrast', parseInt(this.value, 10));
+  };
+  $('saturate-value').onchange = function() {
+    applyFilterValue(2, 'saturate', parseInt(this.value, 10));
+  };
+  $('sharpen-value').onchange = function() {
+    var val = parseFloat(this.value, 0);
+    applyFilterValue(3, 'matrix', getSharpenMatrix(val));
+  };
+  var adjustFunction = function() {
+    applyFilter(4, new f.AdjustSimple({
+        adjustments : [
+            parseInt($('adjust-dark-point').value, 10),
+            parseInt($('adjust-shadows').value, 10),
+            parseInt($('adjust-midtones').value, 10),
+            parseInt($('adjust-highlightes').value, 10),
+            parseInt($('adjust-bright-point').value, 10)
+            ]
+    }));
+  };
+  $('adjust-dark-point').onchange = adjustFunction;
+  $('adjust-shadows').onchange = adjustFunction;
+  $('adjust-midtones').onchange = adjustFunction;
+  $('adjust-highlightes').onchange = adjustFunction;
+  $('adjust-bright-point').onchange = adjustFunction;
+  
+  //$('autoexposure-value').onchange = function() {
+  //  applyFilterValue(5, 'exposureCompensation', parseInt(this.value, 10));
+  //};
+  
+  var rotateControl = $('rotate');
+  rotateControl.onchange = function() {
+    var obj = canvas.getActiveObject();
+    obj.setAngle(parseInt(this.value, 10));
+    canvas.renderAll();
+  };
+  var scaleControl = $('scale-control');
+  scaleControl.onchange = function() {
+    var obj = canvas.getActiveObject();
+    obj.scale(parseFloat(this.value)).setCoords();
+    canvas.renderAll();
+  };
+  
+})();
+    </script>
+
+</body>
+</html>
