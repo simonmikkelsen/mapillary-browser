@@ -1,0 +1,13 @@
+/* Prevents slides from flashing */
+#slides {
+    display:none;
+}
+
+.slidesjs-pagination {
+    display:none;
+}
+
+body {
+    color: white;
+    background-color: black;
+}

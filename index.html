@@ -22,7 +22,7 @@
     <body>
          
         <div class="container">
-            <div class="navbar-brand">Mapillary browser</div>
+            <div class="navbar-brand">Mapillary browser</div> <a href="api/login.py">Login</a>
         </div>
         <div class="container">
     
@@ -36,6 +36,7 @@
                             <li><a href="#tabSelectBySeqId" data-toggle="tab">By sequence ID</a></li>
                             <li id="tabSearchHeader"><a href="#tabSearch" data-toggle="tab">Search</a></li>
                             <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
+                            <li class="metaData"><a href="#tabProfile" data-toggle="tab">Profile</a></li>
                         </ul>
 
                         <div class="tab-content clearfix">
@@ -80,6 +81,9 @@
                                 <div>Image width: <select id="size"><option>320</option><option>640</option><option>1024</option><option>2048</option></select></div>
                                 <div><label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label></div>
                                 <div class="metaData"><label><input type="checkbox" id="showTagBox" /> Show tag box</label></div>
+                            </div>
+                            <div class="tab-pane" id="tabProfile">
+                                <div><a href="">Log in</a></div>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,7 @@
 "use strict";
+
+//http://www.mapillary.com/connect?client_id=Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5OWYyZGMzYjY4ZGU3ZGZh&response_type=token&scope=user:email&redirect_uri=http:%2F%2Fzip.dk%2Fmapillary
+
 $(document).ready(function() {
     var metadata = new MetaData();
     $('#showTagBox').click(function() {
@@ -263,6 +266,7 @@ MetaData.prototype.populateTags = function() {
     });
     
     var self = this;
+    // TODO: Don't use POST for getting stuff in any place.
     $.ajax({
         type: "POST",
         url: 'http://localhost:7788/browser/api/getTags.py',

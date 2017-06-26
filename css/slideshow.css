@@ -1,0 +1,9 @@
+/* Prevents slides from flashing */
+#slides {
+    display:none;
+}
+
+body {
+    color: #ccc;
+    background-color: #444;
+}
