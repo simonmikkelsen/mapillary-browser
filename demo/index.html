@@ -1,47 +1,17 @@
 <html>
 <head>
-    <link rel="stylesheet" href="darkroom/darkroom.css">
-
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="fabric.min.js"></script>
     <script src="bezier.min.github.js"></script>
     <script src="main2.js"></script>
 
 </head>
 <body>
-<p>&nbsp;</p>
 
-<script src="darkroom/darkroom/build/darkroom.js"></script>
-
-  <script>
-    var dkrm = new Darkroom('#target', {
-      // Size options
-      minWidth: 100,
-      minHeight: 100,
-      maxWidth: 600,
-      maxHeight: 500,
-      ratio: 4/3,
-      backgroundColor: '#000',
-      // Plugins options
-      plugins: {
-        //save: false,
-        crop: {
-          quickCropKey: 67, //key "c"
-          //minHeight: 50,
-          //minWidth: 50,
-          //ratio: 4/3
-        }
-      },
-      // Post initialize script
-      initialize: function() {
-        var cropPlugin = this.plugins['crop'];
-        // cropPlugin.selectZone(170, 25, 300, 300);
-        cropPlugin.requireFocus();
-      }
-    });
-  </script>
-
-
-<canvas id="c" width="660" height="500"></canvas>
+<canvas id="c" width="700" height="550"></canvas>
+<p><a href="#" id="startCrop" class="button">Enter crop mode</a>
+        <a href="#" id="crop" class="button">Crop</a>
+</p>
 
 <div class="controls">
   <p>
@@ -72,6 +42,9 @@
 </div>
 
     <script>
+//var $ = function(id){return document.getElementById(id)};
+
+var canvas;
     (function() {
   fabric.Object.prototype.transparentCorners = false;
   fabric.Object.prototype.padding = 5;
@@ -87,9 +60,7 @@
   fabric.Object.prototype.lockSkewingY = true;
   fabric.Object.prototype.selectable = false;
 
-  var $ = function(id){return document.getElementById(id)};
-
-  var canvas = this.__canvas = new fabric.Canvas('c'),
+  canvas = this.__canvas = new fabric.Canvas('c'),
       f = fabric.Image.filters;
 
   function applyFilter(index, filter) {
@@ -132,73 +103,74 @@
   
   initFilters = function() {
     initFilter(0, new f.Brightness({
-      brightness: parseInt($('brightness-value').value, 10)
+      brightness: parseInt($('#brightness-value').value, 10)
     }));
     
     initFilter(1, new f.Contrast({
-      contrast: parseInt($('contrast-value').value, 10)
+      contrast: parseInt($('#contrast-value').value, 10)
     }));
     
     initFilter(2, new f.Saturate({
-      saturate: parseInt($('saturate-value').value, 10)
+      saturate: parseInt($('#saturate-value').value, 10)
     }));
     
     initFilter(3, new f.Convolute({
-      matrix: getSharpenMatrix(parseFloat($('sharpen-value').value))
+      matrix: getSharpenMatrix(parseFloat($('#sharpen-value').value))
     }));
     
     //initFilter(5, new f.AutoExposure({
-    //  exposureCompensation: parseInt($('autoexposure-value').value, 10)
+    //  exposureCompensation: parseInt($('#autoexposure-value').value, 11)
     //}));
   }
   
   fabric.Image.fromURL('tryl-er9RWwCe1cH0xcgsHEj6ZQ.jpg', function(img) {
-    var oImg = img.set({ left: 10, top: 10, angle: 0 });
+    var oImg = img.set({ left: 30, top: 30, angle: 0 });
+    oImg.selectable = false;
     canvas.add(oImg).renderAll();
     canvas.setActiveObject(oImg);
     initFilters();
   });
-  $('brightness-value').onchange = function() {
+  $('#brightness-value').onchange = function() {
     applyFilterValue(0, 'brightness', parseInt(this.value, 10));
   };
-  $('contrast-value').onchange = function() {
+  $('#contrast-value').onchange = function() {
     applyFilterValue(1, 'contrast', parseInt(this.value, 10));
   };
-  $('saturate-value').onchange = function() {
+  $('#saturate-value').onchange = function() {
     applyFilterValue(2, 'saturate', parseInt(this.value, 10));
   };
-  $('sharpen-value').onchange = function() {
+  $('#sharpen-value').onchange = function() {
     var val = parseFloat(this.value, 0);
     applyFilterValue(3, 'matrix', getSharpenMatrix(val));
   };
   var adjustFunction = function() {
     applyFilter(4, new f.AdjustSimple({
         adjustments : [
-            parseInt($('adjust-dark-point').value, 10),
-            parseInt($('adjust-shadows').value, 10),
-            parseInt($('adjust-midtones').value, 10),
-            parseInt($('adjust-highlightes').value, 10),
-            parseInt($('adjust-bright-point').value, 10)
+            parseInt($('#adjust-dark-point').value, 10),
+            parseInt($('#adjust-shadows').value, 10),
+            parseInt($('#adjust-midtones').value, 10),
+            parseInt($('#adjust-highlightes').value, 10),
+            parseInt($('#adjust-bright-point').value, 10)
             ]
     }));
   };
-  $('adjust-dark-point').onchange = adjustFunction;
-  $('adjust-shadows').onchange = adjustFunction;
-  $('adjust-midtones').onchange = adjustFunction;
-  $('adjust-highlightes').onchange = adjustFunction;
-  $('adjust-bright-point').onchange = adjustFunction;
+  $('#adjust-dark-point').onchange = adjustFunction;
+  $('#adjust-shadows').onchange = adjustFunction;
+  $('#adjust-midtones').onchange = adjustFunction;
+  $('#adjust-highlightes').onchange = adjustFunction;
+  $('#adjust-bright-point').onchange = adjustFunction;
   
-  //$('autoexposure-value').onchange = function() {
+  //$('#autoexposure-value').onchange = function() {
   //  applyFilterValue(5, 'exposureCompensation', parseInt(this.value, 10));
   //};
   
-  var rotateControl = $('rotate');
+  var rotateControl = $('#rotate');
   rotateControl.onchange = function() {
     var obj = canvas.getActiveObject();
     obj.setAngle(parseInt(this.value, 10));
     canvas.renderAll();
   };
-  var scaleControl = $('scale-control');
+  var scaleControl = $('#scale-control');
   scaleControl.onchange = function() {
     var obj = canvas.getActiveObject();
     obj.scale(parseFloat(this.value)).setCoords();
@@ -207,6 +179,7 @@
   
 })();
     </script>
+<script src="crop.js"></script>
 
 </body>
 </html>
