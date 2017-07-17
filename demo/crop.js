@@ -14,7 +14,7 @@ var selection_object_top = 0;
 */
 //canvas.renderAll();
 
-$('#crop').on('click', function(event) {
+var doCrop = function(event) {
   var left = el.left - image.left;
   var top = el.top - image.top;
   left *= 1;
@@ -28,19 +28,20 @@ $('#crop').on('click', function(event) {
   for (var i = 0; i < $("#layers li").size(); i++) {
     canvas.item(i).selectable = true;
   }
-  disabled = true;
+  //disabled = true;
 
   canvas.remove(canvas.getActiveObject());
-  lastActive = object;
+  lastActive = image;
   canvas.renderAll();
-});
+  canvas.setActiveObject(image);
+};
 
-$('#startCrop').on('click', function() {
+var startCrop = function() {
 
   canvas.remove(el);
   image = canvas.item(0);
 
-  if (lastActive && lastActive !== object) {
+  if (lastActive && lastActive !== image) {
     lastActive.clipTo = null;
   }
   el = new fabric.Rect({
@@ -52,7 +53,7 @@ $('#startCrop').on('click', function() {
     opacity: 1,
     width: 1,
     height: 1,
-    borderColor: '#36fd00',
+    borderColor: 'transparent',
     cornerColor: 'green',
     hasRotatingPoint: false,
     hasControls: true,
@@ -71,10 +72,17 @@ $('#startCrop').on('click', function() {
 
   canvas.add(el);
   canvas.setActiveObject(el);
-console.log(canvas.getActiveObject());
   for (var i = 0; i < $("#layers li").size(); i++) {
     canvas.item(i).selectable = false;
   }
 
-});
+};
 
+$('#cropEnabled').on('click', function(e) {
+  if (e.target.checked) {
+    startCrop();
+  } else {
+    doCrop();
+  }
+  
+});

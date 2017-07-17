@@ -9,8 +9,8 @@
 <body>
 
 <canvas id="c" width="700" height="550"></canvas>
-<p><a href="#" id="startCrop" class="button">Enter crop mode</a>
-        <a href="#" id="crop" class="button">Crop</a>
+<p>
+<label><input type="checkbox" id="cropEnabled"> Enable crop</label>
 </p>
 
 <div class="controls">
@@ -103,23 +103,23 @@ var canvas;
   
   initFilters = function() {
     initFilter(0, new f.Brightness({
-      brightness: parseInt($('#brightness-value').value, 10)
+      brightness: parseInt($('#brightness-value').val(), 10)
     }));
     
     initFilter(1, new f.Contrast({
-      contrast: parseInt($('#contrast-value').value, 10)
+      contrast: parseInt($('#contrast-value').val(), 10)
     }));
     
     initFilter(2, new f.Saturate({
-      saturate: parseInt($('#saturate-value').value, 10)
+      saturate: parseInt($('#saturate-value').val(), 10)
     }));
     
     initFilter(3, new f.Convolute({
-      matrix: getSharpenMatrix(parseFloat($('#sharpen-value').value))
+      matrix: getSharpenMatrix(parseFloat($('#sharpen-value').val()))
     }));
     
     //initFilter(5, new f.AutoExposure({
-    //  exposureCompensation: parseInt($('#autoexposure-value').value, 11)
+    //  exposureCompensation: parseInt($('#autoexposure-value').val(), 11)
     //}));
   }
   
@@ -130,52 +130,52 @@ var canvas;
     canvas.setActiveObject(oImg);
     initFilters();
   });
-  $('#brightness-value').onchange = function() {
+  $('#brightness-value').change(function() {
     applyFilterValue(0, 'brightness', parseInt(this.value, 10));
-  };
-  $('#contrast-value').onchange = function() {
+  });
+  $('#contrast-value').change(function() {
     applyFilterValue(1, 'contrast', parseInt(this.value, 10));
-  };
-  $('#saturate-value').onchange = function() {
+  });
+  $('#saturate-value').change(function() {
     applyFilterValue(2, 'saturate', parseInt(this.value, 10));
-  };
-  $('#sharpen-value').onchange = function() {
+  });
+  $('#sharpen-value').change(function() {
     var val = parseFloat(this.value, 0);
     applyFilterValue(3, 'matrix', getSharpenMatrix(val));
-  };
+  });
   var adjustFunction = function() {
     applyFilter(4, new f.AdjustSimple({
         adjustments : [
-            parseInt($('#adjust-dark-point').value, 10),
-            parseInt($('#adjust-shadows').value, 10),
-            parseInt($('#adjust-midtones').value, 10),
-            parseInt($('#adjust-highlightes').value, 10),
-            parseInt($('#adjust-bright-point').value, 10)
+            parseInt($('#adjust-dark-point').val(), 10),
+            parseInt($('#adjust-shadows').val(), 10),
+            parseInt($('#adjust-midtones').val(), 10),
+            parseInt($('#adjust-highlightes').val(), 10),
+            parseInt($('#adjust-bright-point').val(), 10)
             ]
     }));
   };
-  $('#adjust-dark-point').onchange = adjustFunction;
-  $('#adjust-shadows').onchange = adjustFunction;
-  $('#adjust-midtones').onchange = adjustFunction;
-  $('#adjust-highlightes').onchange = adjustFunction;
-  $('#adjust-bright-point').onchange = adjustFunction;
+  $('#adjust-dark-point').change(adjustFunction);
+  $('#adjust-shadows').change(adjustFunction);
+  $('#adjust-midtones').change(adjustFunction);
+  $('#adjust-highlightes').change(adjustFunction);
+  $('#adjust-bright-point').change(adjustFunction);
   
-  //$('#autoexposure-value').onchange = function() {
+  //$('#autoexposure-value').change(function() {
   //  applyFilterValue(5, 'exposureCompensation', parseInt(this.value, 10));
-  //};
+  //});
   
   var rotateControl = $('#rotate');
-  rotateControl.onchange = function() {
+  rotateControl.change(function() {
     var obj = canvas.getActiveObject();
     obj.setAngle(parseInt(this.value, 10));
     canvas.renderAll();
-  };
+  });
   var scaleControl = $('#scale-control');
-  scaleControl.onchange = function() {
+  scaleControl.change(function() {
     var obj = canvas.getActiveObject();
     obj.scale(parseFloat(this.value)).setCoords();
     canvas.renderAll();
-  };
+  });
   
 })();
     </script>
