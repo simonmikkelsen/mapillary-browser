@@ -1,18 +1,16 @@
 // Forked from https://fiddle.jshell.net/filiperoberto/wLub3jau/
 
-//var canvas = new fabric.Canvas('c');
+(function(global) {
+
+ // 'use strict'; *//TODO: Reintroduce and fix errors.
+
+var imageEditor = global.imageEditor|| (global.imageEditor = { });
+var canvas = imageEditor.canvas;
 var el;
 var image, lastActive, object1, object2;
 var cntObj = 0;
 var selection_object_left = 0;
 var selection_object_top = 0;
-
-/*fabric.Image.fromURL('http://serio.piiym.net/CVBla/txtboard/thumb/1260285874089s.jpg', function(oImg) {
-  oImg.selectable = false;
-  canvas.add(oImg);
-});
-*/
-//canvas.renderAll();
 
 var doCrop = function(event) {
   var left = el.left - image.left;
@@ -28,7 +26,6 @@ var doCrop = function(event) {
   for (var i = 0; i < $("#layers li").size(); i++) {
     canvas.item(i).selectable = true;
   }
-  //disabled = true;
 
   canvas.remove(canvas.getActiveObject());
   lastActive = image;
@@ -86,3 +83,5 @@ $('#cropEnabled').on('click', function(e) {
   }
   
 });
+
+})(typeof exports !== 'undefined' ? exports : this);
