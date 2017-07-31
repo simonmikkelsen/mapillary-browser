@@ -85,6 +85,7 @@
   
   fabric.Image.fromURL('tryl-er9RWwCe1cH0xcgsHEj6ZQ.jpg', function(img) {
     var oImg = img.set({ left: 30, top: 30, angle: 0 });
+    imageEditor.image = oImg;
     oImg.selectable = false;
     canvas.add(oImg).renderAll();
     canvas.setActiveObject(oImg);
@@ -126,13 +127,15 @@
   
   var rotateControl = $('#rotate');
   rotateControl.change(function() {
-    var obj = canvas.getActiveObject();
+    var obj = imageEditor.image;
     obj.setAngle(parseInt(this.value, 10));
+    canvas.trigger('image:rotated', { target: obj });
     canvas.renderAll();
   });
+
   var scaleControl = $('#scale-control');
   scaleControl.change(function() {
-    var obj = canvas.getActiveObject();
+    var obj = imageEditor.image;
     obj.scale(parseFloat(this.value)).setCoords();
     canvas.renderAll();
   });
