@@ -22,7 +22,7 @@
     <body>
          
         <div class="container">
-            <div class="navbar-brand">Mapillary browser</div> <a href="api/login.py">Login</a>
+            <div class="navbar-brand">Mapillary browser</div> <span id="loginbar"><a href="api/login.py">Login</a></span>
         </div>
         <div class="container">
     
@@ -36,7 +36,6 @@
                             <li><a href="#tabSelectBySeqId" data-toggle="tab">By sequence ID</a></li>
                             <li id="tabSearchHeader"><a href="#tabSearch" data-toggle="tab">Search</a></li>
                             <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
-                            <li class="metaData"><a href="#tabProfile" data-toggle="tab">Profile</a></li>
                         </ul>
 
                         <div class="tab-content clearfix">
@@ -82,9 +81,6 @@
                                 <div><label><input type="checkbox" id="fitImagesToWindow" /> Fit images to window</label></div>
                                 <div class="metaData"><label><input type="checkbox" id="showTagBox" /> Show tag box</label></div>
                             </div>
-                            <div class="tab-pane" id="tabProfile">
-                                <div><a href="">Log in</a></div>
-                            </div>
                         </div>
                     </div>
                 
@@ -107,6 +103,7 @@
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="js/login.js"></script>
         <script src="js/vendor/jquery.unveil.js"></script>
         <script src="js/keys.js"></script>
         <script src="js/main.js"></script>

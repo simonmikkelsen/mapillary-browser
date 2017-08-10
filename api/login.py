@@ -16,7 +16,9 @@ import random
 EXTRA_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 if EXTRA_DIR not in sys.path:
     sys.path.append(EXTRA_DIR)
+
 import config
+import dao
 
 try:
     import requests
@@ -51,6 +53,13 @@ def application(environ, start_response):
     r = h.getresponse()
     resp = r.read()
     userinfo = json.loads(resp)
+    
+    mysql = dao.MySQLDAO()
+    user_dao = dao.UserDAO(mysql)
+    
+    # TODO: Handle we dont get a user.
+    sessionid = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(32))
+    user_dao.ensure_user(sessionid, userinfo['username'], userinfo['key'], userinfo['avatar'])
 
     """    
     status = '200 OK'
@@ -65,10 +74,10 @@ def application(environ, start_response):
     start_response(status, response_headers)
     return [response_body]
 """ 
-    sessionid = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(32))
 
     cookie = SimpleCookie()
-    cookie['session'] = sessionid + '; Path=/'
+    cookie['session'] = sessionid
+    cookie['session']['path'] = '/'
     
     a = config.AppConfig();
     url = a.getBaseUri()

@@ -17,7 +17,8 @@ class MySQLDAO:
         password = c.getPassword()
         host = c.getHost()
         database = c.getDatabase()
-        self.cnx = mysql.connector.connect(user = user, password = password, host = host, database = database)
+        port = c.getPort()
+        self.cnx = mysql.connector.connect(user = user, password = password, host = host, database = database, port = port)
         self.cursor = self.cnx.cursor()
     def close(self):
         self.cursor.close()
@@ -143,6 +144,22 @@ class ImageDAO:
         else:
             return None
 
+class UserDAO:
+    def __init__(self, dao):
+        self.dao = dao
+    def ensure_user(self, session_id, mapillary_username, mapillary_user_key, mapillary_avatar):
+        sql = 'INSERT INTO user (user, mapillary_key, avatar, sessionid) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE user = %s, mapillary_key = %s, avatar = %s, sessionid = %s'
+        data_half = (mapillary_username, mapillary_user_key, mapillary_avatar, session_id)
+        data = data_half + data_half
+        self.dao.execute(sql, data)
+        self.dao.commit()
+    def get_user_by_session_id(self, session_id):
+        sql = 'SELECT * FROM user WHERE sessionid = %s'
+        return self.dao.select(sql, (session_id, ))
+    def invalidate_session(self, session_id):
+        sql = "UPDATE user SET sessionid = %s WHERE sessionid = %s"
+        self.dao.execute(sql, ("", session_id))
+        self.dao.commit()
 class TagDAO:
     def __init__(self, dao):
         self.dao = dao
