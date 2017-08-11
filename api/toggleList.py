@@ -25,7 +25,7 @@ except ImportError:
 class ImageNotFoundException(Exception):
     pass
     
-def toggle_on_list(user, listdata):
+def toggle_on_list(mysql, user, listdata):
     mysql = dao.MySQLDAO()
     tag_dao = dao.TagDAO(mysql)
     list_dao = dao.ListDAO(mysql)
@@ -50,14 +50,20 @@ def application (environ, start_response):
     except (ValueError):
         request_body_size = 0
 
-    response_body = ""
+    current_user = None
+    mysql = dao.MySQLDAO()
+    userService = services.UserSessionService(mysql, environ)
+    if userService.is_logged_in():
+        current_user = userService.get_username()
+    else:
+        return send_json_response(start_response, '401 Unauthorized', {})
     
     request_body = environ['wsgi.input'].read(request_body_size)
     req_json = json.loads(request_body)
     
     response_body = json.dumps({'status':'ok'})
     try:
-        toggle_on_list('tryl', req_json)
+        toggle_on_list(mysql, current_user, req_json)
     except ImageNotFoundException as infe:
         response_body = json.dumps({'status':'error', 'cause':'image_not_found'})
     
@@ -71,6 +77,16 @@ def application (environ, start_response):
 
     start_response(status, response_headers)
     return [response_body]
+    
+    def send_json_response(start_response, status, response_data):
+        response_body = json.dumps(response_data)
+        response_headers = [
+            ('Content-Type', 'text/json'),
+            ('Content-Length', str(len(response_body)))
+        ]
+
+        start_response(status, response_headers)
+        return [response_body]
 
 if __name__ == '__main__':
     list_name = 'mylist2'

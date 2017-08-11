@@ -1,7 +1,5 @@
 "use strict";
 
-//http://www.mapillary.com/connect?client_id=Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5OWYyZGMzYjY4ZGU3ZGZh&response_type=token&scope=user:email&redirect_uri=http:%2F%2Fzip.dk%2Fmapillary
-
 $(document).ready(function() {
     var metadata = new MetaData();
     $('#showTagBox').click(function() {
@@ -79,7 +77,7 @@ $(document).ready(function() {
         var searchJson = JSON.stringify(searchParameters);
         $.ajax({
             type: "POST",
-            url: 'http://localhost:7788/browser/api/search.py',
+            url: 'api/search.py',
             data: searchJson,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -176,7 +174,7 @@ MetaData.prototype.ensureListStatus = function(keysOnList, keysOffList, listName
    var self = this;
    $.ajax({
        type: "POST",
-       url: 'http://localhost:7788/browser/api/toggleList.py',
+       url: 'api/toggleList.py',
        data: listJson,
        contentType: "application/json; charset=utf-8",
        dataType: "json",
@@ -197,7 +195,7 @@ MetaData.prototype.triggerBatchUpdate = function(data) {
    var self = this;
    $.ajax({
        type: "POST",
-       url: 'http://localhost:7788/browser/api/getLists.py',
+       url: 'api/getLists.py',
        data: listJson,
        contentType: "application/json; charset=utf-8",
        dataType: "json",
@@ -269,7 +267,7 @@ MetaData.prototype.populateTags = function() {
     // TODO: Don't use POST for getting stuff in any place.
     $.ajax({
         type: "POST",
-        url: 'http://localhost:7788/browser/api/getTags.py',
+        url: 'api/getTags.py',
         data: JSON.stringify(keys),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -311,7 +309,7 @@ MetaData.prototype.buttonsAdded = function(prefix) {
         var data = self.getTagData(button);
         $.ajax({
             type: "POST",
-            url: 'http://localhost:7788/browser/api/saveTags.py',
+            url: 'api/saveTags.py',
             data: data,
             contentType: "application/json; charset=utf-8",
             dataType: "json",

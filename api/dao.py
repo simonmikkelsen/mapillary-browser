@@ -73,7 +73,7 @@ class ListDAO:
         format_strings = self.dao.get_var_arg_format_strings(len(mapillary_keys))
         sql = ("INSERT IGNORE INTO image_list_item (image, list) "
                  "SELECT image.id, image_list.id FROM image, user, image_list WHERE "
-                 "mapillary_key IN ({list_replacements}) AND image_list.name = %s AND image_list.user = user.id AND user.user = %s").format(list_replacements=format_strings)
+                 "image.mapillary_key IN ({list_replacements}) AND image_list.name = %s AND image_list.user = user.id AND user.user = %s").format(list_replacements=format_strings)
         self.dao.execute(sql, tuple(mapillary_keys) + (list_name, user_name))
     def ensure_off_list(self, user_name, list_name, mapillary_keys):
         if len(mapillary_keys) == 0:
