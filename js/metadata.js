@@ -154,6 +154,7 @@ function MetaData() {
     this.up = [];
     this.down = [];
     this.fav = [];
+    this.login = window.login;
     
     var self = this;
     this.batchTrigger = new BatchTrigger(function(data){
@@ -191,6 +192,10 @@ MetaData.prototype.imageUnveiled = function(mapillary_key) {
 }
 
 MetaData.prototype.triggerBatchUpdate = function(data) {
+   if (! this.login.isLoggedIn()) {
+       return;
+   }
+   
    var listJson = JSON.stringify({'lists' : ['--favorites', '--upvotes', '--downvotes'], 'images' : data});
    var self = this;
    $.ajax({
@@ -221,7 +226,6 @@ MetaData.prototype.triggerBatchUpdate = function(data) {
 
 MetaData.prototype.addFavorite = function(mapillary_key) {
     this.fav.push(mapillary_key);
-    //.removeClass('glyphicon-heart-empty').addClass('glyphicon-heart')
     $('.imageKey[value='+mapillary_key+']').closest('.imageBox').find('.favorite').addClass('selected');
 }
 

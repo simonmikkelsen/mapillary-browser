@@ -2,10 +2,10 @@
 -- version 4.4.15.5
 -- http://www.phpmyadmin.net
 --
--- Vært: localhost:3306
--- Genereringstid: 26. 01 2017 kl. 13:13:59
--- Serverversion: 5.5.49-log
--- PHP-version: 7.0.9
+-- Host: localhost:3302
+-- Generation Time: Aug 17, 2017 at 01:23 PM
+-- Server version: 5.5.49-log
+-- PHP Version: 5.6.24
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -19,11 +19,13 @@ SET time_zone = "+00:00";
 --
 -- Database: `mexplorer`
 --
+CREATE DATABASE IF NOT EXISTS `mexplorer` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+USE `mexplorer`;
 
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `image`
+-- Table structure for table `image`
 --
 
 CREATE TABLE IF NOT EXISTS `image` (
@@ -39,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `image` (
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `image_list`
+-- Table structure for table `image_list`
 --
 
 CREATE TABLE IF NOT EXISTS `image_list` (
@@ -53,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `image_list` (
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `image_list_item`
+-- Table structure for table `image_list_item`
 --
 
 CREATE TABLE IF NOT EXISTS `image_list_item` (
@@ -68,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `image_list_item` (
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `tag`
+-- Table structure for table `tag`
 --
 
 CREATE TABLE IF NOT EXISTS `tag` (
@@ -79,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
--- Triggers/udløsere `tag`
+-- Triggers `tag`
 --
 DELIMITER $$
 CREATE TRIGGER `tag_rev__ai` AFTER INSERT ON `tag`
@@ -103,7 +105,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `tag_rev`
+-- Table structure for table `tag_rev`
 --
 
 CREATE TABLE IF NOT EXISTS `tag_rev` (
@@ -119,21 +121,23 @@ CREATE TABLE IF NOT EXISTS `tag_rev` (
 -- --------------------------------------------------------
 
 --
--- Struktur-dump for tabellen `user`
+-- Table structure for table `user`
 --
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL,
   `user` varchar(255) COLLATE utf8_bin NOT NULL,
-  `avatar` varchar(255) COLLATE utf8_bin NOT NULL
+  `avatar` varchar(255) COLLATE utf8_bin NOT NULL,
+  `sessionid` char(32) COLLATE utf8_bin NOT NULL,
+  `mapillary_key` char(22) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
--- Begrænsninger for dumpede tabeller
+-- Indexes for dumped tables
 --
 
 --
--- Indeks for tabel `image`
+-- Indexes for table `image`
 --
 ALTER TABLE `image`
   ADD PRIMARY KEY (`id`),
@@ -142,7 +146,7 @@ ALTER TABLE `image`
   ADD KEY `captured_at` (`captured_at`);
 
 --
--- Indeks for tabel `image_list`
+-- Indexes for table `image_list`
 --
 ALTER TABLE `image_list`
   ADD PRIMARY KEY (`id`),
@@ -151,7 +155,7 @@ ALTER TABLE `image_list`
   ADD KEY `user_2` (`user`);
 
 --
--- Indeks for tabel `image_list_item`
+-- Indexes for table `image_list_item`
 --
 ALTER TABLE `image_list_item`
   ADD PRIMARY KEY (`id`),
@@ -160,7 +164,7 @@ ALTER TABLE `image_list_item`
   ADD KEY `image` (`image`);
 
 --
--- Indeks for tabel `tag`
+-- Indexes for table `tag`
 --
 ALTER TABLE `tag`
   ADD PRIMARY KEY (`id`),
@@ -168,72 +172,73 @@ ALTER TABLE `tag`
   ADD KEY `image` (`image`);
 
 --
--- Indeks for tabel `tag_rev`
+-- Indexes for table `tag_rev`
 --
 ALTER TABLE `tag_rev`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeks for tabel `user`
+-- Indexes for table `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user` (`user`),
   ADD KEY `user_index` (`user`),
   ADD KEY `id` (`id`);
 
 --
--- Brug ikke AUTO_INCREMENT for slettede tabeller
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- Tilføj AUTO_INCREMENT i tabel `image`
+-- AUTO_INCREMENT for table `image`
 --
 ALTER TABLE `image`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Tilføj AUTO_INCREMENT i tabel `image_list`
+-- AUTO_INCREMENT for table `image_list`
 --
 ALTER TABLE `image_list`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Tilføj AUTO_INCREMENT i tabel `image_list_item`
+-- AUTO_INCREMENT for table `image_list_item`
 --
 ALTER TABLE `image_list_item`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Tilføj AUTO_INCREMENT i tabel `tag`
+-- AUTO_INCREMENT for table `tag`
 --
 ALTER TABLE `tag`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Tilføj AUTO_INCREMENT i tabel `tag_rev`
+-- AUTO_INCREMENT for table `tag_rev`
 --
 ALTER TABLE `tag_rev`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Tilføj AUTO_INCREMENT i tabel `user`
+-- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- Begrænsninger for dumpede tabeller
+-- Constraints for dumped tables
 --
 
 --
--- Begrænsninger for tabel `image_list`
+-- Constraints for table `image_list`
 --
 ALTER TABLE `image_list`
   ADD CONSTRAINT `user` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE CASCADE;
 
 --
--- Begrænsninger for tabel `image_list_item`
+-- Constraints for table `image_list_item`
 --
 ALTER TABLE `image_list_item`
   ADD CONSTRAINT `image` FOREIGN KEY (`image`) REFERENCES `image` (`id`),
   ADD CONSTRAINT `list` FOREIGN KEY (`list`) REFERENCES `image_list` (`id`);
 
 --
--- Begrænsninger for tabel `tag`
+-- Constraints for table `tag`
 --
 ALTER TABLE `tag`
   ADD CONSTRAINT `TAG_IMAGE` FOREIGN KEY (`image`) REFERENCES `image` (`id`) ON DELETE NO ACTION;

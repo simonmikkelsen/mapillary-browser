@@ -202,53 +202,55 @@ SequenceViewer.prototype.activateUnveil = function(keys) {
     });
 }
 
-SequenceViewer.prototype.getImageLink = function(imageKey, imageSize) {
+SequenceViewer.prototype.getImageLink = function(imageKey, imageSize, loggedIn) {
     // Image sizes are only given so the images are located where the probably will be.
     // The unveil plugin can then wait to load images untill they are about to be shown.
     
-    return "<div class=\"imageBox\">"
+    var res = "<div class=\"imageBox\">"
         + "<div class=\"image\"><a href=\"https://www.mapillary.com/app/?pKey="+imageKey+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""
-        + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a></div>"
-        + "<div class=\"list-icons\">"
-        + " <span class=\"glyphicon glyphicon-heart-empty favorite\" ></span>"
-        + " <span class=\"glyphicon glyphicon-thumbs-up up\" ></span>"
-        + " <span class=\"glyphicon glyphicon-thumbs-down down\" ></span>"
-        + "</div>"
-        + "<div class=\"metaDataBox\">"
-        + "<form>"
-        + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
-        + "     <button type=\"button\" class=\"btn btn-default saveButton\">Save</button>"
-        + "     <button type=\"button\" class=\"btn btn-default addButton\">Add</button>"
-        + "     <span class=\"fa fa-spinner fa-spin spinner\" style=\"font-size:24px; display: none\"></span>"
-        + "</form>"
-        + "</div>"
-        + "</div>";
+        + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a></div>";
+    if (loggedIn) {
+        res += "<div class=\"list-icons\">"
+            + " <span class=\"glyphicon glyphicon-heart-empty favorite\" ></span>"
+            + " <span class=\"glyphicon glyphicon-thumbs-up up\" ></span>"
+            + " <span class=\"glyphicon glyphicon-thumbs-down down\" ></span>"
+            + "</div>"
+            + "<div class=\"metaDataBox\">"
+            + "<form>"
+            + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
+            + "     <button type=\"button\" class=\"btn btn-default saveButton\">Save</button>"
+            + "     <button type=\"button\" class=\"btn btn-default addButton\">Add</button>"
+            + "     <span class=\"fa fa-spinner fa-spin spinner\" style=\"font-size:24px; display: none\"></span>"
+            + "</form>"
+            + "</div>";
+    }
+    res += "</div>";
+    return res;
 }
 
 SequenceViewer.prototype.showImagesByKeys = function(keys) {
-    var imageSize = $('#size').val();
-
-    var items = [];
+    console.log(window.login);
     var self = this;
-    $.each(keys , function(key, val) {
-        items.push(self.getImageLink(val, imageSize));
+    window.login.whenLoggedIn(function(loggedIn) {
+        var imageSize = $('#size').val();
+
+        var items = [];
+        $.each(keys , function(key, val) {
+            items.push(self.getImageLink(val, imageSize, loggedIn));
+        });
+        
+        self.addItemsToImageContainer(items);
+        self.activateUnveil();
     });
-    
-    this.addItemsToImageContainer(items);
-    this.activateUnveil();
 }
 
 SequenceViewer.prototype.showImages = function(images) {
-    var imageSize = $('#size').val();
-
     var items = [];
     var self = this;
     $.each(images , function(i, img) {
-        items.push(self.getImageLink(img['key'], imageSize));
+        items.push(img['key']);
     });
-     
-    this.addItemsToImageContainer(items);
-    this.activateUnveil();
+    this.showImagesByKeys(items);
 }
 
 SequenceViewer.prototype.addItemsToImageContainer = function(items) {
