@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 --
 -- Database: `mexplorer`
 --
-CREATE DATABASE IF NOT EXISTS `mexplorer` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+CREATE DATABASE IF NOT EXISTS `mexplorer` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_cs;
 USE `mexplorer`;
 
 -- --------------------------------------------------------
@@ -30,13 +30,13 @@ USE `mexplorer`;
 
 CREATE TABLE IF NOT EXISTS `image` (
   `id` int(11) NOT NULL,
-  `mapillary_key` char(32) COLLATE utf8_bin NOT NULL,
+  `mapillary_key` char(32) COLLATE utf8_general_cs NOT NULL,
   `ca` float DEFAULT NULL,
   `lat` float DEFAULT NULL,
   `lon` float DEFAULT NULL,
-  `username` varchar(255) COLLATE utf8_bin NOT NULL,
+  `username` varchar(255) COLLATE utf8_general_cs NOT NULL,
   `captured_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 -- --------------------------------------------------------
 
@@ -46,11 +46,11 @@ CREATE TABLE IF NOT EXISTS `image` (
 
 CREATE TABLE IF NOT EXISTS `image_list` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_general_cs NOT NULL,
   `user` int(11) NOT NULL,
   `public` tinyint(1) NOT NULL,
   `locked` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 -- --------------------------------------------------------
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `image_list_item` (
   `added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `image_order` int(11) NOT NULL,
   `list` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 -- --------------------------------------------------------
 
@@ -76,9 +76,9 @@ CREATE TABLE IF NOT EXISTS `image_list_item` (
 CREATE TABLE IF NOT EXISTS `tag` (
   `id` int(11) NOT NULL,
   `image` int(11) NOT NULL,
-  `keytext` char(64) COLLATE utf8_bin NOT NULL,
-  `value` varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `keytext` char(64) COLLATE utf8_general_cs NOT NULL,
+  `value` varchar(255) COLLATE utf8_general_cs NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 --
 -- Triggers `tag`
@@ -110,13 +110,13 @@ DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS `tag_rev` (
   `id` int(11) NOT NULL,
-  `action` varchar(6) COLLATE utf8_bin NOT NULL,
+  `action` varchar(6) COLLATE utf8_general_cs NOT NULL,
   `changedate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `mapillary_key` char(32) COLLATE utf8_bin NOT NULL,
+  `mapillary_key` char(32) COLLATE utf8_general_cs NOT NULL,
   `image` int(11) DEFAULT NULL,
-  `keytext` varchar(64) COLLATE utf8_bin NOT NULL,
-  `value` varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `keytext` varchar(64) COLLATE utf8_general_cs NOT NULL,
+  `value` varchar(255) COLLATE utf8_general_cs NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 -- --------------------------------------------------------
 
@@ -126,11 +126,11 @@ CREATE TABLE IF NOT EXISTS `tag_rev` (
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` int(11) NOT NULL,
-  `user` varchar(255) COLLATE utf8_bin NOT NULL,
-  `avatar` varchar(255) COLLATE utf8_bin NOT NULL,
-  `sessionid` char(32) COLLATE utf8_bin NOT NULL,
-  `mapillary_key` char(22) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `user` varchar(255) COLLATE utf8_general_cs NOT NULL,
+  `avatar` varchar(255) COLLATE utf8_general_cs NOT NULL,
+  `sessionid` char(32) COLLATE utf8_general_cs NOT NULL,
+  `mapillary_key` char(22) COLLATE utf8_general_cs NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_cs;
 
 --
 -- Indexes for dumped tables
