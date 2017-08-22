@@ -14,7 +14,7 @@ $(function(){
     var slideWidth = pageWidth - 20;
     var slideHeight = pageWidth * 2 / 3;
     
-    $.getJSON( "api/getUnifiedLists.py", {'list':'--favorites'}, function(images) {
+    $.getJSON( "api/v0/getUnifiedLists.py", {'list':'--favorites'}, function(images) {
         $.each(images, function(i, image){
             var mapillary_key = image[1];
             var favoriteCount = image[2];

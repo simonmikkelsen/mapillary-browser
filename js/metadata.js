@@ -77,7 +77,7 @@ $(document).ready(function() {
         var searchJson = JSON.stringify(searchParameters);
         $.ajax({
             type: "POST",
-            url: 'api/search.py',
+            url: 'api/v0/search.py',
             data: searchJson,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -175,7 +175,7 @@ MetaData.prototype.ensureListStatus = function(keysOnList, keysOffList, listName
    var self = this;
    $.ajax({
        type: "POST",
-       url: 'api/toggleList.py',
+       url: 'api/v0/toggleList.py',
        data: listJson,
        contentType: "application/json; charset=utf-8",
        dataType: "json",
@@ -270,7 +270,7 @@ MetaData.prototype.populateTags = function() {
     // TODO: Don't use POST for getting stuff in any place.
     $.ajax({
         type: "POST",
-        url: 'api/getTags.py',
+        url: 'api/v0/getTags.py',
         data: JSON.stringify(keys),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -312,7 +312,7 @@ MetaData.prototype.buttonsAdded = function(prefix) {
         var data = self.getTagData(button);
         $.ajax({
             type: "POST",
-            url: 'api/saveTags.py',
+            url: 'api/v0/saveTags.py',
             data: data,
             contentType: "application/json; charset=utf-8",
             dataType: "json",

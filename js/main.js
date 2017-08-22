@@ -354,7 +354,7 @@ SequenceViewer.prototype.updateImagesForList = function() {
     var self = this;
     $.ajax({
         type: "POST",
-        url: 'api/getLists.py',
+        url: 'api/v0/getLists.py',
         data: listJson,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -550,7 +550,7 @@ SequenceViewer.prototype.populateListNames = function() {
     }
     var self = this;
     window.login.whenLoggedIn(function(loggedIn) {
-        var url = "api/getListNames.py";
+        var url = "api/v0/getListNames.py";
         $.getJSON(url, function(data) {
             $.each(data, function(index, list_name) {
                 $("#listNames").append($('<option>', {
