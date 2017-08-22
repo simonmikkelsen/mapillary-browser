@@ -61,7 +61,7 @@ Login.prototype.onLoginStatus = function(func) {
 }
 
 Login.prototype.onNextLoginAttempt = function(func) {
-    this.onNextLoginAttemptList = func;
+    this.onNextLoginAttemptList.push(func);
 }
 
 Login.prototype.whenLoggedIn = function(func) {

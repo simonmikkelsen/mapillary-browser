@@ -14,6 +14,7 @@ if EXTRA_DIR not in sys.path:
 
 import dao
 import services
+import config
 
 try:
     import requests
@@ -24,8 +25,19 @@ except ImportError:
 def get_list_contents(mysql, current_user, list_name):
     list_dao = dao.ListDAO(mysql)
     return list_dao.get_list_contents(current_user, list_name)
-    
         
+def strip_right(text, suffix):
+    if not text.endswith(suffix):
+        return text
+    
+    return text[:len(text)-len(suffix)]
+
+def get_public_list_contents(mysql, list_names):
+    list_names = [strip_right(name, "--global") for name in list_names]
+
+    list_dao = dao.ListDAO(mysql)
+    return list_dao.get_unified_list_contents(list_names)
+
 def application(environ, start_response):
     # the environment variable CONTENT_LENGTH may be empty or missing
     try:
@@ -37,14 +49,27 @@ def application(environ, start_response):
     userService = services.UserSessionService(mysql, environ)
     if userService.is_logged_in():
         current_user = userService.get_username()
-    else:
-        return send_json_response(start_response, '401 Unauthorized', {})
     
     request_body = environ['wsgi.input'].read(request_body_size)
     args = json.loads(request_body)
     list_names = args['lists']
+
+    c = config.AppConfig()
+    if not userService.is_logged_in():
+        # If not logged in: Only return the requested public lists.
+        list_names = list(set().intersection(list_names, c.getPublicReadableLists()))
+
+    # list_names - c.getPublicReadableLists()
+    private_lists = list(set(list_names).difference(c.getPublicReadableLists()))
+    public_lists = list(set(list_names).intersection(c.getPublicReadableLists()))
+    #sys.stderr.write(";".join(c.getPublicReadableLists()) + "<---------------\n")
     
-    list_contents = get_list_contents(mysql, current_user, list_names)
+    list_contents = []
+    if len(private_lists) > 0:
+        list_contents += get_list_contents(mysql, current_user, private_lists)
+    if len(public_lists) > 0:
+        list_contents += get_public_list_contents(mysql, public_lists)
+
     return send_json_response(start_response, '200 OK', list_contents)
     
 def send_json_response(start_response, status, response_data):

@@ -232,7 +232,6 @@ MetaData.prototype.addFavorite = function(mapillary_key) {
 MetaData.prototype.addUp = function(mapillary_key) {
     this.up.push(mapillary_key);
     $('.imageKey[value='+mapillary_key+']').closest('.imageBox').find('.up').addClass('selected');
-    console.log("Add up", mapillary_key);
 }
 
 MetaData.prototype.addDown = function(mapillary_key) {

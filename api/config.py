@@ -20,8 +20,12 @@ class DbConfig:
 class AppConfig:
     def __init__(self):
         self.base_uri = "http://devel:7788/browser/"
+        self.public_readable_lists = ['--favorites--global', '--upvotes--global', '--downvotes--global']
     def getBaseUri(self):
         return self.base_uri
+    def getPublicReadableLists(self):
+        return self.public_readable_lists
+
 class MapillaryConfig:
     def __init__(self):
         self.client_id = "Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5ZWMxNmYwNGYxNjY2YjA0"

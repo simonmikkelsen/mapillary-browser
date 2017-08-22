@@ -36,6 +36,7 @@
                         <ul class="nav nav-pills">
                             <li class="active"><a href="#tabSelectSequencesOnMap" data-toggle="tab">Sequences on map</a></li>
                             <li><a href="#tabSelectImagesOnMap" data-toggle="tab">Images on map</a></li>
+                            <li><a href="#tabSelectImagesInList" data-toggle="tab">Images in lists</a></li>
                             <li><a href="#tabSelectBySeqId" data-toggle="tab">By sequence ID</a></li>
                             <li id="tabSearchHeader"><a href="#tabSearch" data-toggle="tab">Search</a></li>
                             <li><a href="#tabOptions" data-toggle="tab">Options</a></li>
@@ -58,6 +59,12 @@
                                 <p>Zoom and move the map to only show the area you want to get images from. This will find all images within the area not taking sequences into account.</p>
                                 <p>Start date: <input type="text" class="datepicker startDate"> End date: <input type="text" class="datepicker endDate"> User: <input type="text" class="userField"></p>
                                 <input type="button" value="Show images from map" id="showMapImages" />
+                            </div>
+                            <div class="tab-pane" id="tabSelectImagesInList">
+                                <h4>Show images in a list</h4>
+                                <p>Select list</p>
+                                <select id="listNames"></select>
+                                <input type="button" value="Show images in list" id="showInList" />
                             </div>
                             <div class="tab-pane" id="tabSearch">
                                 <h4>Search for images</h4>

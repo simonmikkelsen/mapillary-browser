@@ -14,11 +14,6 @@ $(document).ready(function() {
         maxZoom: 18
     }).addTo(mymap);
     
-    /*L.tileLayer('https://d6a1v2w10ny40.cloudfront.net/v0.1/{z}/{x}/{y}.png', {
-		maxZoom: 17,
-		id: 'mapillary.sequences'
-	}).addTo(mymap);*/
-    
     $(".datepicker").datepicker({
       changeMonth: true,
       changeYear: true,
@@ -37,6 +32,10 @@ $(document).ready(function() {
         seqViewer.updateImagesForMap();
     });
     
+    $('#showInList').click(function() {
+        seqViewer.updateImagesForList();
+    });
+    
     $('#fitImagesToWindow').click(function() {
         seqViewer.fitImagesToWindow();
     });
@@ -53,6 +52,7 @@ $(document).ready(function() {
         }, 0);
     });
     
+    // TODO: Restore state of showing a list.
     var state = new StateManager();
     var method = state.getValue('method');
     if (method == 'imagesOnMap') {
@@ -64,7 +64,12 @@ $(document).ready(function() {
     } else if (state.isSequenceSelected()) {
         $('a[href="#tabSelectBySeqId"]').tab('show');
         seqViewer.updateFromSequenzeState();
+    } else if (state.isListSelected()) {
+        $('a[href="#tabSelectImagesInList"]').tab('show');
+        seqViewer.updateFromSequenzeState();
     }
+
+    seqViewer.populateListNames();
 });
 
 $(document).on('keydown', function (e) {
@@ -118,6 +123,10 @@ StateManager.prototype.clearNonMapState = function() {
     this.updateUrlHash();
 }
 
+StateManager.prototype.isListSelected = function() {
+    return this.arguments['list'] !== undefined;
+}
+
 StateManager.prototype.isSequenceSelected = function() {
     return this.arguments['seqId'] !== undefined;
 }
@@ -169,7 +178,8 @@ function SequenceViewer(map) {
     this.state = new StateManager();
     this.imageLoadedListeners = [];
     this.unveilListeners = [];
-    
+    this.imgInfobyValue = [];
+
     this.metadata = null;
     if (typeof MetaData != 'undefined') {
         this.metadata = new MetaData();
@@ -202,41 +212,46 @@ SequenceViewer.prototype.activateUnveil = function(keys) {
     });
 }
 
-SequenceViewer.prototype.getImageLink = function(imageKey, imageSize, loggedIn) {
+SequenceViewer.prototype.getImageLink = function(imageKey, user, captured_at, imageSize, loggedIn) {
     // Image sizes are only given so the images are located where the probably will be.
     // The unveil plugin can then wait to load images untill they are about to be shown.
     
     var res = "<div class=\"imageBox\">"
         + "<div class=\"image\"><a href=\"https://www.mapillary.com/app/?pKey="+imageKey+"&amp;focus=photo\"><img src=\"img/pixie.png\" width=\""
         + imageSize+"\" height=\""+(imageSize*3/4)+"\" data-src=\"https://d1cuyjsrcm0gby.cloudfront.net/"+imageKey+"/thumb-"+imageSize+".jpg\" /></a></div>";
-    if (loggedIn) {
         res += "<div class=\"list-icons\">"
-            + " <span class=\"glyphicon glyphicon-heart-empty favorite\" ></span>"
-            + " <span class=\"glyphicon glyphicon-thumbs-up up\" ></span>"
-            + " <span class=\"glyphicon glyphicon-thumbs-down down\" ></span>"
-            + "</div>"
-            + "<div class=\"metaDataBox\">"
-            + "<form>"
-            + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
-            + "     <button type=\"button\" class=\"btn btn-default saveButton\">Save</button>"
-            + "     <button type=\"button\" class=\"btn btn-default addButton\">Add</button>"
-            + "     <span class=\"fa fa-spinner fa-spin spinner\" style=\"font-size:24px; display: none\"></span>"
-            + "</form>"
-            + "</div>";
+    if (loggedIn) {
+        res += " <span class=\"glyphicon glyphicon-heart-empty favorite\" ></span>"
+        + " <span class=\"glyphicon glyphicon-thumbs-up up\" ></span>"
+        + " <span class=\"glyphicon glyphicon-thumbs-down down\" ></span>"
+    }
+    if (user != undefined) {
+        res += '<span class="imageUser pull-right"><a href="https://www.mapillary.com/app/user/' + user + '?focus=photo&pKey=' + imageKey + '">' + user + '</a></span>';
+    }
+    res += "</div>";
+
+    if (loggedIn) {
+        res += "<div class=\"metaDataBox\">"
+        + "<form>"
+        + "     <input type=\"hidden\" name=\"imageKey\" class=\"imageKey\" value=\""+imageKey+"\">"
+        + "     <button type=\"button\" class=\"btn btn-default saveButton\">Save</button>"
+        + "     <button type=\"button\" class=\"btn btn-default addButton\">Add</button>"
+        + "     <span class=\"fa fa-spinner fa-spin spinner\" style=\"font-size:24px; display: none\"></span>"
+        + "</form>"
+        + "</div>";
     }
     res += "</div>";
     return res;
 }
 
 SequenceViewer.prototype.showImagesByKeys = function(keys) {
-    console.log(window.login);
     var self = this;
     window.login.whenLoggedIn(function(loggedIn) {
         var imageSize = $('#size').val();
 
         var items = [];
         $.each(keys , function(key, val) {
-            items.push(self.getImageLink(val, imageSize, loggedIn));
+            items.push(self.getImageLink(val, undefined, undefined, imageSize, loggedIn));
         });
         
         self.addItemsToImageContainer(items);
@@ -245,12 +260,18 @@ SequenceViewer.prototype.showImagesByKeys = function(keys) {
 }
 
 SequenceViewer.prototype.showImages = function(images) {
-    var items = [];
     var self = this;
-    $.each(images , function(i, img) {
-        items.push(img['key']);
+    window.login.whenLoggedIn(function(loggedIn) {
+        var imageSize = $('#size').val();
+
+        var items = [];
+        $.each(images , function(i, img) {
+            items.push(self.getImageLink(img['key'], img['user'], img['captured_at'], imageSize, loggedIn));
+        });
+        
+        self.addItemsToImageContainer(items);
+        self.activateUnveil();
     });
-    this.showImagesByKeys(items);
 }
 
 SequenceViewer.prototype.addItemsToImageContainer = function(items) {
@@ -325,6 +346,36 @@ SequenceViewer.prototype.setUrlArgsInState = function() {
     } else {
         this.state.removeValue('user');
     }
+}
+
+SequenceViewer.prototype.updateImagesForList = function() {
+    var list_name = $('#listNames').val();
+    var listJson = JSON.stringify({'lists' : [list_name], 'images' : null});
+    var self = this;
+    $.ajax({
+        type: "POST",
+        url: 'api/getLists.py',
+        data: listJson,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+    }).done(function(lists) {
+        var images = [];
+        $.each(lists, function(i, keyVal){
+            var listName = keyVal[0];
+            images.push({key: keyVal[1], user: keyVal[2], captured_at: keyVal[3]});
+        });
+
+        self.state.clearState();
+        self.state.setValue('page', 0);
+        self.state.setValue('list', list_name);
+
+        self.showImages(images);
+        self.updateNextPrev(false);
+        self.imagesLoaded();
+     }).fail(function (){
+        // TODO: Make proper error handling.
+        console.log('fail');
+    });
 }
 
 SequenceViewer.prototype.updateImagesForMap = function() {
@@ -423,6 +474,11 @@ SequenceViewer.prototype.updateFromMapState = function() {
     }
 }
 
+SequenceViewer.prototype.updateFromListState = function() {
+    var list_name = this.state.getValue('list');
+    
+}
+
 SequenceViewer.prototype.updateFromSequenzeState = function() {
     var seqId = this.state.getValue('seqId');
     this.showSequence(seqId);
@@ -470,5 +526,38 @@ SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, ma
         });
         self.updateNextPrev(data['more']);
         self.imagesLoaded();
+    });
+}
+
+SequenceViewer.prototype.populateListNames = function() {
+
+    var getDisplayName = function(list_name) {
+        if (list_name == '--favorites--global') {
+            return 'Favorites (global)';
+        } else if (list_name == '--upvotes--global') {
+            return 'Upvotes (global)';
+        } else if (list_name == '--downvotes--global') {
+            return 'Downvotes (global)';
+        } else if (list_name == '--favorites') {
+            return 'Favorites';
+        } else if (list_name == '--upvotes') {
+            return 'Upvotes';
+        } else if (list_name == '--downvotes') {
+            return 'Downvotes';
+        } else {
+            return list_name;
+        }
+    }
+    var self = this;
+    window.login.whenLoggedIn(function(loggedIn) {
+        var url = "api/getListNames.py";
+        $.getJSON(url, function(data) {
+            $.each(data, function(index, list_name) {
+                $("#listNames").append($('<option>', {
+                    value: list_name,
+                    text: getDisplayName(list_name)
+                }));
+            });
+        });
     });
 }

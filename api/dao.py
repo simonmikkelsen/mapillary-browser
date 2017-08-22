@@ -54,13 +54,16 @@ class ListDAO:
         self.dao = dao
     def get_list_contents(self, current_user, list_names):
         format_strings = self.dao.get_var_arg_format_strings(len(list_names))
-        sql = ("SELECT DISTINCT image_list.name, image.mapillary_key FROM image_list_item, image_list, user, image WHERE user.user = %s AND image_list.user = user.id AND"
+        sql = ("SELECT DISTINCT image_list.name, image.mapillary_key, image.username, UNIX_TIMESTAMP(image.captured_at) FROM image_list_item, image_list, user, image WHERE user.user = %s AND image_list.user = user.id AND"
                " image_list.name in ({list_replacements}) AND image_list_item.list = image_list.id AND image_list_item.image = image.id").format(list_replacements=format_strings)
         return self.dao.select(sql, (current_user,)+tuple(list_names))
+    def get_list_names(self, current_user):
+        sql = "SELECT DISTINCT image_list.name FROM image_list, user WHERE image_list.user = user.id AND user.user = %s"
+        return self.dao.select(sql, (current_user,))
 
     def get_unified_list_contents(self, list_names):
         format_strings = self.dao.get_var_arg_format_strings(len(list_names))
-        sql = ("SELECT DISTINCT image_list.name, image.mapillary_key, COUNT(*) AS count FROM image_list_item, image_list, image WHERE image_list.name in ({list_replacements})"
+        sql = ("SELECT DISTINCT image_list.name, image.mapillary_key, image.username, UNIX_TIMESTAMP(image.captured_at), COUNT(*) AS count FROM image_list_item, image_list, image WHERE image_list.name in ({list_replacements})"
             " AND image_list.public = 1 AND image_list_item.list = image_list.id AND image_list_item.image = image.id GROUP BY image_list.name, image.mapillary_key ORDER BY count").format(list_replacements=format_strings)
         return self.dao.select(sql, tuple(list_names))
         
