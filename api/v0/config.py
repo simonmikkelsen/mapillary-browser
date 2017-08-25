@@ -28,8 +28,8 @@ class AppConfig:
 
 class MapillaryConfig:
     def __init__(self):
-        self.client_id = "Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTo5ZWMxNmYwNGYxNjY2YjA0"
-        self.redirect_uri = "http://devel:7788/api"
+        self.client_id = "Y0NtM3R4Zm52cTBOSUlrTFAwWFFFQTowYzI0NTBlY2I1ODEzNDhl"
+        self.redirect_uri = "http://devel:7788/browser/api/v0/login"
     def getClientId(self):
         return self.client_id
     def getRedirectUri(self):

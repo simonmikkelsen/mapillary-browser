@@ -134,8 +134,8 @@ class ImageDAO:
     def __init__(self, dao):
         self.dao = dao
     def ensure_image(self, imageKey, ca, lat, lon, username, captured_at):
-        sql = 'INSERT INTO image (mapillary_key, ca, lat, lon, username, captured_at) VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s)) ON DUPLICATE KEY UPDATE mapillary_key = %s, ca = %s, lat = %s, lon = %s, username = %s, captured_at = FROM_UNIXTIME(%s)'
-        data_half = (imageKey, ca, lat, lon, username, (captured_at / 1000))
+        sql = 'INSERT INTO image (mapillary_key, ca, lat, lon, username, captured_at) VALUES (%s, %s, %s, %s, %s, CAST(%s AS DATETIME)) ON DUPLICATE KEY UPDATE mapillary_key = %s, ca = %s, lat = %s, lon = %s, username = %s, captured_at = FROM_UNIXTIME(%s)'
+        data_half = (imageKey, ca, lat, lon, username, captured_at)
         data = data_half + data_half
         self.dao.execute(sql, data)
     def get_image_id_by_key(self, image_key):

@@ -200,7 +200,7 @@ MetaData.prototype.triggerBatchUpdate = function(data) {
    var self = this;
    $.ajax({
        type: "POST",
-       url: 'api/getLists.py',
+       url: 'api/v0/getLists.py',
        data: listJson,
        contentType: "application/json; charset=utf-8",
        dataType: "json",

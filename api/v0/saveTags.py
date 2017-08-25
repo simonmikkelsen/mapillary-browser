@@ -28,17 +28,17 @@ def add_tags(image_key, tags_user):
     # Get Mapillary details
     m = mapillary.MapillaryRequest()
     image = m.get_image(image_key)
-    #image = json.loads('{"ca": 0, "lon": 9.48598333333333, "location": "", "key": "%s", "lat": 55.2427611111111, "captured_at": 1469725910000, "user": "hjart"}' % image_key)
+    
+    # Ensure image
+    if 'type' not in image or image['type'] != 'Feature':
+        raise ImageNotFoundException("Image not found: "+str(image_key))
     
     mysql = dao.MySQLDAO()
     image_dao = dao.ImageDAO(mysql)
     tag_dao = dao.TagDAO(mysql)
     
-    # Ensure image
-    if 'code' in image and image['code'] == 'not_found':
-        raise ImageNotFoundException("Image not found: "+str(image_key))
-    
-    image_dao.ensure_image(image_key, image['ca'], image['lat'], image['lon'], image['user'], image['captured_at'])
+    image_dao.ensure_image(image_key, image['properties']['ca'], image['geometry']['coordinates'][0], image['geometry']['coordinates'][1],
+        image['properties']['username'], image['properties']['captured_at'])
     
     image_id = image_dao.get_image_id_by_key(image_key)
     
@@ -64,11 +64,11 @@ def application (environ, start_response):
     request_body = environ['wsgi.input'].read(request_body_size)
     req_json = json.loads(request_body)
     image_key = req_json['imageKey']
-    response_body = json.dumps(['status':'ok'])
+    response_body = json.dumps({'status':'ok'})
     try:
         add_tags(image_key, req_json['tags'])
-    except ImageNotFoundException infe:
-        response_body = json.dumps(['status':'error', 'cause':'image_not_found'])
+    except ImageNotFoundException as infe:
+        response_body = json.dumps({'status':'error', 'cause':'image_not_found'})
     
     """
     If image not exists: Fetch data from Mapillary, create row. Fetch image for future quality analysis.

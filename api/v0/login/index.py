@@ -13,7 +13,7 @@ from Cookie import SimpleCookie
 import string
 import random
 
-EXTRA_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
+EXTRA_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 if EXTRA_DIR not in sys.path:
     sys.path.append(EXTRA_DIR)
 
@@ -60,20 +60,6 @@ def application(environ, start_response):
     # TODO: Handle we dont get a user.
     sessionid = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(32))
     user_dao.ensure_user(sessionid, userinfo['username'], userinfo['key'], userinfo['avatar'])
-
-    """    
-    status = '200 OK'
-    response_body = str(resp)
-    
-    # Now content type is text/html
-    response_headers = [
-        ('Content-Type', 'text/plain'),
-        ('Content-Length', str(len(response_body)))
-    ]
-
-    start_response(status, response_headers)
-    return [response_body]
-""" 
 
     cookie = SimpleCookie()
     cookie['session'] = sessionid

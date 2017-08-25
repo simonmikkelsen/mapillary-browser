@@ -114,6 +114,7 @@ StateManager.prototype.clearNonSequenceState = function() {
 }
 
 StateManager.prototype.clearState = function() {
+    this.pageNo = 0;
     this.arguments = {};
     this.updateUrlHash();
 }
@@ -212,6 +213,18 @@ SequenceViewer.prototype.activateUnveil = function(keys) {
     });
 }
 
+SequenceViewer.prototype.showImagesByKeys = function(keys) {
+    var self = this;
+    var imageSize = $('#size').val();
+
+    var items = [];
+    $.each(keys , function(key, val) {
+        items.push(self.getImageLink(val, undefined, undefined, imageSize, loggedIn));
+    });
+
+    self.addItemsToImageContainer(items);
+ }
+
 SequenceViewer.prototype.getImageLink = function(imageKey, user, captured_at, imageSize, loggedIn) {
     // Image sizes are only given so the images are located where the probably will be.
     // The unveil plugin can then wait to load images untill they are about to be shown.
@@ -244,21 +257,6 @@ SequenceViewer.prototype.getImageLink = function(imageKey, user, captured_at, im
     return res;
 }
 
-SequenceViewer.prototype.showImagesByKeys = function(keys) {
-    var self = this;
-    window.login.whenLoggedIn(function(loggedIn) {
-        var imageSize = $('#size').val();
-
-        var items = [];
-        $.each(keys , function(key, val) {
-            items.push(self.getImageLink(val, undefined, undefined, imageSize, loggedIn));
-        });
-        
-        self.addItemsToImageContainer(items);
-        self.activateUnveil();
-    });
-}
-
 SequenceViewer.prototype.showImages = function(images) {
     var self = this;
     window.login.whenLoggedIn(function(loggedIn) {
@@ -267,6 +265,57 @@ SequenceViewer.prototype.showImages = function(images) {
         var items = [];
         $.each(images , function(i, img) {
             items.push(self.getImageLink(img['key'], img['user'], img['captured_at'], imageSize, loggedIn));
+        });
+        
+        self.addItemsToImageContainer(items);
+        self.activateUnveil();
+    });
+}
+
+SequenceViewer.prototype.showImagesGeojson = function(geojson) {
+    if (geojson['type'] === 'FeatureCollection') {
+        this.showImagesGeojsonFeatureCollection(geojson);
+    } else if (geojson['type'] === 'Feature') {
+        this.showImagesGeojsonFeature(geojson);
+    } else {
+       console.log('Got no FeatureCollection type i GeoJson: ' + geojson['type']);
+    }
+
+}
+
+SequenceViewer.prototype.showImagesGeojsonFeature = function(geojson) {
+    var self = this;
+    window.login.whenLoggedIn(function(loggedIn) {
+        var imageSize = $('#size').val();
+
+        var items = [];
+        $.each(geojson['properties']['coordinateProperties']['image_keys'], function(i, imagekey) {
+            items.push(self.getImageLink(imagekey, undefined, undefined, imageSize, loggedIn));
+        });
+        
+        self.addItemsToImageContainer(items);
+        self.activateUnveil();
+    });
+}
+
+SequenceViewer.prototype.showImagesGeojsonFeatureCollection = function(geojson) {
+    var self = this;
+    window.login.whenLoggedIn(function(loggedIn) {
+        var imageSize = $('#size').val();
+
+        var items = [];
+        $.each(geojson['features'], function(i, feature) {
+            var properties = feature['properties'];
+            var geometryType = feature['geometry']['type'];
+            if (geometryType === "LineString") {
+                $.each(properties['coordinateProperties']['image_keys'], function(i, imagekey) {
+                    items.push(self.getImageLink(imagekey, undefined, undefined, imageSize, loggedIn));
+                });
+            } else if (geometryType === "Point") {
+                items.push(self.getImageLink(properties['key'], properties['username'], properties['captured_at'], imageSize, loggedIn));
+            } else {
+                console.log("Unknown geometry type: " + geometryType);
+            }
         });
         
         self.addItemsToImageContainer(items);
@@ -291,9 +340,9 @@ SequenceViewer.prototype.showSequence = function(seqId) {
         return;
     }
     var self = this;
-    $.getJSON( "https://a.mapillary.com/v2/s/"+seqId+"?client_id="+clientId, function(seq) {
-        var key = seq['keys'];
-        self.showImagesByKeys(key);
+    $.getJSON( "https://a.mapillary.com/v3/sequences/"+seqId+"?client_id="+clientId, function(geojson) {
+        self.showImagesGeojson(geojson);
+
         self.state.clearNonSequenceState();
         self.state.setValue('seqId', seqId);
         self.imagesLoaded();
@@ -310,14 +359,14 @@ SequenceViewer.prototype.getUrlArgsForOptions = function() {
     var endDate = $(containerID+" .endDate").datepicker("getDate");
     var extraArgs = "";
     if (startDate !== null) {
-        extraArgs += "&start_time="+startDate.getTime();
+        extraArgs += "&start_time="+startDate.toISOString();
     }
     if (endDate !== null) {
-        extraArgs += "&end_time="+endDate.getTime();
+        extraArgs += "&end_time="+endDate.toISOString();
     }
     var user = $(containerID+" .userField").val();
     if (user !== undefined && user.trim().length > 0) {
-        extraArgs += "&user="+encodeURIComponent(user);
+        extraArgs += "&usernames="+encodeURIComponent(user);
     }
     return extraArgs;
 }
@@ -366,11 +415,10 @@ SequenceViewer.prototype.updateImagesForList = function() {
         });
 
         self.state.clearState();
-        self.state.setValue('page', 0);
         self.state.setValue('list', list_name);
 
         self.showImages(images);
-        self.updateNextPrev(false);
+        self.clearNextPrev(); //TODO: Next/prev not supported by lists yet.
         self.imagesLoaded();
      }).fail(function (){
         // TODO: Make proper error handling.
@@ -390,7 +438,7 @@ SequenceViewer.prototype.updateImagesForMap = function() {
     
     var extraArgs = this.getUrlArgsForOptions();
     
-    var url = "https://a.mapillary.com/v2/search/im?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=500&page="+this.pageNo+""+extraArgs;
+    var url = "https://a.mapillary.com/v3/images?client_id=" + clientId + "&bbox=" + max_lat + "," + max_lon + "," + min_lat + "," + min_lon + "&per_page=500&page=" + this.pageNo + extraArgs;
     
     this.state.clearState();
     this.setUrlArgsInState();
@@ -402,30 +450,46 @@ SequenceViewer.prototype.updateImagesForMap = function() {
     this.state.setValue('method', 'imagesOnMap');
     
     var self = this;
-    $.getJSON(url, function(data) {
-        self.showImages(data['ims']);
-        self.updateNextPrev(data['more']);
+    $.getJSON(url, function(geojson, status, xhr) {
+        self.showImagesGeojson(geojson);
+        self.updateNextPrevFromHeaders(xhr);
         self.imagesLoaded();
     });
 }
 
-SequenceViewer.prototype.updateNextPrev = function(isMoreData) {
-    $(".nextPrevBar").empty();
+SequenceViewer.prototype.clearNextPrev = function() {
+    $(".nextPrevBar").html('');
+}
+
+SequenceViewer.prototype.updateNextPrevFromHeaders = function(xhr) {
+    var link = this.parseLinkHeader(xhr.getResponseHeader("Link"));
+    //TODO: Use https://github.com/thlorenz/parse-link-header to parse instead.
     var self = this;
-    if (this.pageNo > 0) {
+    var first = $("<button type=\"button\" class=\"btn btn-link\">First</button>").click(function () {
+        self.pageNo = 0;
+        self.updateSequenceFromMapillaryLink(link['first']);
+        self.updateSequenceForMap();
+    });
+    $(".nextPrevBar").html(first);
+    
+    if (link['prev'] !== undefined) {
         var prev = $("<button type=\"button\" class=\"btn btn-link\">Previous</button>").click(function () {
             self.pageNo--;
+            self.updateSequenceFromMapillaryLink(link['prev']);
             self.updateSequenceForMap();
         });
-      $(".nextPrevBar").append(prev).append(" - ");
+        $(".nextPrevBar").append(" - ").append(prev);
+    } else {
+        $(".nextPrevBar").append(" -&nbsp;&nbsp;Previous");
     }
-  
-    if (isMoreData === true) {
+
+    if (link['next'] !== undefined) {
         var next = $("<button type=\"button\" class=\"btn btn-link\">Next</button>").click(function () {
             self.pageNo++;
+            self.updateSequenceFromMapillaryLink(link['next']);
             self.updateSequenceForMap();
         });
-        $(".nextPrevBar").append(next);;
+        $(".nextPrevBar").append(" - ").append(next);
     }
 }
 
@@ -474,6 +538,28 @@ SequenceViewer.prototype.updateFromMapState = function() {
     }
 }
 
+// Thanks https://gist.github.com/niallo/3109252
+SequenceViewer.prototype.parseLinkHeader = function(header) {
+    if (header.length === 0) {
+        throw new Error("input must not be of zero length");
+    }
+
+    // Split parts by comma
+    var parts = header.split(',');
+    var links = {};
+    // Parse each part into a named link
+    for(var i=0; i<parts.length; i++) {
+        var section = parts[i].split(';');
+        if (section.length !== 2) {
+            throw new Error("section could not be split on ';'");
+        }
+        var url = section[0].replace(/<(.*)>/, '$1').trim();
+        var name = section[1].replace(/rel="(.*)"/, '$1').trim();
+        links[name] = url;
+    }
+    return links;
+}
+
 SequenceViewer.prototype.updateFromListState = function() {
     var list_name = this.state.getValue('list');
     
@@ -506,9 +592,18 @@ SequenceViewer.prototype.imageUnveiled = function(image) {
     }
 }
 
+SequenceViewer.prototype.updateSequenceFromMapillaryLink = function(mapillary_url) {
+    var self = this;
+    $.getJSON(mapillary_url, function(geojson, status, xhr) {
+        self.showImagesGeojson(geojson);
+        self.updateNextPrevFromHeaders(xhr);
+        self.imagesLoaded();
+    });
+}
+
 SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, max_lon) {
     var extraArgs = this.getUrlArgsForOptions();
-    var url = "https://a.mapillary.com/v2/search/s?client_id="+clientId+"&max_lat="+max_lat+"&max_lon="+max_lon+"&min_lat="+min_lat+"&min_lon="+min_lon+"&limit=1&page="+this.pageNo+extraArgs
+    var url = "https://a.mapillary.com/v3/sequences?client_id=" + clientId + "&bbox=" + max_lat + "," + max_lon + "," + min_lat + "," + min_lon + "&per_page=1&page=" + this.pageNo + extraArgs;
     
     this.state.clearState();
     this.setUrlArgsInState();
@@ -520,11 +615,9 @@ SequenceViewer.prototype.updateSequence = function(min_lat, max_lat, min_lon, ma
     this.state.setValue('method', 'sequencesOnMap');
     
     var self = this;
-    $.getJSON(url, function(data) {
-        $.each(data['ss'], function(key, seq) {
-           self.showImagesByKeys(seq['keys']);
-        });
-        self.updateNextPrev(data['more']);
+    $.getJSON(url, function(geojson, status, xhr) {
+        self.showImagesGeojson(geojson);
+        self.updateNextPrevFromHeaders(xhr);
         self.imagesLoaded();
     });
 }
